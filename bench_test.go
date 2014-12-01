@@ -37,6 +37,9 @@ func init() {
 	}
 }
 
+// RuneTrie
+///////////////////////////////////////////////////////////////////////////////
+
 // string keys
 
 func BenchmarkRuneTriePutStringKey(b *testing.B) {
@@ -80,6 +83,69 @@ func BenchmarkRuneTrieGetPathKey(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		trie.Get(pathKeys[i%len(pathKeys)])
+	}
+}
+
+// PathTrie
+///////////////////////////////////////////////////////////////////////////////
+
+func BenchmarkPathTriePutStringKey(b *testing.B) {
+	trie := NewPathTrie()
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		trie.Put(stringKeys[i%len(stringKeys)], i)
+	}
+}
+
+func BenchmarkPathTrieGetStringKey(b *testing.B) {
+	trie := NewPathTrie()
+	for i := 0; i < b.N; i++ {
+		trie.Put(stringKeys[i%len(stringKeys)], i)
+	}
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		trie.Get(stringKeys[i%len(stringKeys)])
+	}
+}
+
+// string keys
+
+func BenchmarkPathTriePutPathKey(b *testing.B) {
+	trie := NewPathTrie()
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		trie.Put(pathKeys[i%len(pathKeys)], i)
+	}
+}
+
+func BenchmarkPathTrieGetPathKey(b *testing.B) {
+	trie := NewPathTrie()
+	for i := 0; i < b.N; i++ {
+		trie.Put(pathKeys[i%len(pathKeys)], i)
+	}
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		trie.Get(pathKeys[i%len(pathKeys)])
+	}
+}
+
+
+// benchmark PathTrie's keySplit
+
+func BenchmarkKeySplitter(b *testing.B) {
+	b.ResetTimer()
+	b.ReportAllocs()
+	for j := 0; j < b.N; j++ {
+		for part, i := keySplit(pathKeys[j%len(pathKeys)], 0);; part,i = keySplit(pathKeys[j%len(pathKeys)], i) {
+			var _ = part   // NoOp 'use' the key part
+			if i == -1 {
+				break
+			}
+		}
 	}
 }
 
