@@ -18,8 +18,6 @@ Read the full documentation: [https://godoc.org/github.com/dghubble/trie](https:
 
 These benchmarks Put and Get random string keys (30 bytes long).
 
-    RuneTrie (rune-wise)
-
     BenchmarkRuneTriePutStringKey  5000000    613 ns/op    1 B/op   0 allocs/op
     BenchmarkRuneTrieGetStringKey  5000000    623 ns/op    0 B/op   0 allocs/op
     BenchmarkPathTriePutStringKey  20000000   92.0 ns/op   0 B/op   0 allocs/op
