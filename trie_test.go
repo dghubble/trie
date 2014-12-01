@@ -48,11 +48,10 @@ func TestPathTrieWalk(t *testing.T) {
 	testTrieWalk(t, trie)
 }
 
-
 func testTrie(t *testing.T, trie Trier) {
 	const firstPutValue = "first put"
-	cases := []struct { 
-		key string
+	cases := []struct {
+		key   string
 		value interface{}
 	}{
 		{"fish", 0},
@@ -116,8 +115,8 @@ func testTrie(t *testing.T, trie Trier) {
 }
 
 func testNilBehavior(t *testing.T, trie Trier) {
-	cases := []struct { 
-		key string
+	cases := []struct {
+		key   string
 		value interface{}
 	}{
 		{"/cat", 1},
@@ -155,7 +154,7 @@ func testTrieRoot(t *testing.T, trie Trier) {
 		t.Error("expected key '' to have a value already")
 	}
 	if value := trie.Get(""); value != putValue {
-			t.Errorf("expected key '' to have value %v, got %v", putValue, value)
+		t.Errorf("expected key '' to have value %v, got %v", putValue, value)
 	}
 	if !trie.Delete("") {
 		t.Error("expected key '' to be deleted")
@@ -166,15 +165,15 @@ func testTrieRoot(t *testing.T, trie Trier) {
 }
 
 func testTrieWalk(t *testing.T, trie Trier) {
-	table := map[string]interface{} {
-		"fish": 0,
-		"/cat": 1,
-		"/dog": 2,
-		"/cats": 3,
+	table := map[string]interface{}{
+		"fish":         0,
+		"/cat":         1,
+		"/dog":         2,
+		"/cats":        3,
 		"/caterpillar": 4,
-		"/notes": 30,
-		"/notes/new": 31,
-		"/notes/:id": 32,
+		"/notes":       30,
+		"/notes/new":   31,
+		"/notes/:id":   32,
 	}
 	// key -> times walked
 	walked := make(map[string]int)

@@ -4,9 +4,9 @@ type WalkFunc func(key string, value interface{}) error
 
 // RuneTrie is a trie of runes with string keys and interface{} values.
 // Note that internal nodes have nil values so a stored nil value will not
-// be distinguishable and will not be included in Walks. 
+// be distinguishable and will not be included in Walks.
 type RuneTrie struct {
-	value interface{}
+	value    interface{}
 	children map[rune]*RuneTrie
 }
 
@@ -18,7 +18,7 @@ func NewRuneTrie() *RuneTrie {
 }
 
 // Get returns the value stored at the given key. Returns nil for internal
-// nodes or for nodes with a value of nil. 
+// nodes or for nodes with a value of nil.
 func (trie *RuneTrie) Get(key string) interface{} {
 	node := trie
 	for _, r := range key {
@@ -34,7 +34,7 @@ func (trie *RuneTrie) Get(key string) interface{} {
 // existing items. It returns true if the put adds a new value, false
 // if it replaces an existing value.
 // Note that internal nodes have nil values so a stored nil value will not
-// be distinguishable and will not be included in Walks. 
+// be distinguishable and will not be included in Walks.
 func (trie *RuneTrie) Put(key string, value interface{}) bool {
 	node := trie
 	for _, r := range key {
@@ -94,7 +94,7 @@ func (trie *RuneTrie) Walk(walker WalkFunc) error {
 // RuneTrie node and the rune key of the child the path descends into.
 type nodeRune struct {
 	node *RuneTrie
-	r rune
+	r    rune
 }
 
 func (trie *RuneTrie) walk(key string, walker WalkFunc) error {
@@ -102,10 +102,10 @@ func (trie *RuneTrie) walk(key string, walker WalkFunc) error {
 		walker(key, trie.value)
 	}
 	for r, child := range trie.children {
-			err := child.walk(key + string(r), walker)
-			if err != nil {
-				return err
-			}
+		err := child.walk(key+string(r), walker)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

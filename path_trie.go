@@ -6,9 +6,9 @@ import (
 
 // PathTrie is a trie of paths with string keys and interface{} values.
 // Note that internal nodes have nil values so a stored nil value will not
-// be distinguishable and will not be included in Walks. 
+// be distinguishable and will not be included in Walks.
 type PathTrie struct {
-	value interface{}
+	value    interface{}
 	children map[string]*PathTrie
 }
 
@@ -19,7 +19,7 @@ func NewPathTrie() *PathTrie {
 	}
 }
 
-// Part returns the next part of 
+// Part returns the next part of
 func keySplit(path string, start int) (segment string, next int) {
 	if len(path) == 0 {
 		return path, -1
@@ -28,14 +28,14 @@ func keySplit(path string, start int) (segment string, next int) {
 	if end == -1 {
 		return path[start:], -1
 	}
-	return path[start:start+end+1], start + end + 1
+	return path[start : start+end+1], start + end + 1
 }
 
 // Get returns the value stored at the given key. Returns nil for internal
-// nodes or for nodes with a value of nil. 
+// nodes or for nodes with a value of nil.
 func (trie *PathTrie) Get(key string) interface{} {
 	node := trie
-	for part,i := keySplit(key, 0);; part,i = keySplit(key, i) {
+	for part, i := keySplit(key, 0); ; part, i = keySplit(key, i) {
 		node = node.children[part]
 		if node == nil {
 			return nil
@@ -51,10 +51,10 @@ func (trie *PathTrie) Get(key string) interface{} {
 // existing items. It returns true if the put adds a new value, false
 // if it replaces an existing value.
 // Note that internal nodes have nil values so a stored nil value will not
-// be distinguishable and will not be included in Walks. 
+// be distinguishable and will not be included in Walks.
 func (trie *PathTrie) Put(key string, value interface{}) bool {
 	node := trie
-	for part,i := keySplit(key, 0);; part,i = keySplit(key, i) {
+	for part, i := keySplit(key, 0); ; part, i = keySplit(key, i) {
 		child, _ := node.children[part]
 		if child == nil {
 			child = NewPathTrie()
@@ -77,7 +77,7 @@ func (trie *PathTrie) Put(key string, value interface{}) bool {
 func (trie *PathTrie) Delete(key string) bool {
 	path := make([]nodeStr, 0) // record ancestors to check later
 	node := trie
-	for part,i := keySplit(key, 0);; part,i = keySplit(key, i) {
+	for part, i := keySplit(key, 0); ; part, i = keySplit(key, i) {
 		path = append(path, nodeStr{part: part, node: node})
 		node = node.children[part]
 		if node == nil {
@@ -125,10 +125,10 @@ func (trie *PathTrie) walk(key string, walker WalkFunc) error {
 		walker(key, trie.value)
 	}
 	for part, child := range trie.children {
-			err := child.walk(key + part, walker)
-			if err != nil {
-				return err
-			}
+		err := child.walk(key+part, walker)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

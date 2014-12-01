@@ -7,7 +7,7 @@ import (
 // test splitting /path/keys/ into parts (e.g. /path, /keys, /)
 func TestKeySpliter(t *testing.T) {
 	cases := []struct {
-		key string
+		key   string
 		parts []string
 	}{
 		{"", []string{""}},
@@ -22,12 +22,12 @@ func TestKeySpliter(t *testing.T) {
 
 	for _, c := range cases {
 		partNum := 0
-		for prefix, i := keySplit(c.key, 0);; prefix,i = keySplit(c.key, i) {
+		for prefix, i := keySplit(c.key, 0); ; prefix, i = keySplit(c.key, i) {
 			if prefix != c.parts[partNum] {
 				t.Errorf("expected part %d of key '%s' to be '%s', got '%s'", partNum, c.key, c.parts[partNum], prefix)
 			}
 			partNum++
-			if i == -1  {
+			if i == -1 {
 				break
 			}
 		}

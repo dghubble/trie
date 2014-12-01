@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-var stringKeys [1000]string  // random string keys
+var stringKeys [1000]string // random string keys
 const bytesPerKey = 30
 
-var pathKeys [1000]string   // random /paths/of/parts keys
+var pathKeys [1000]string // random /paths/of/parts keys
 const partsPerKey = 3     // (e.g. /a/b/c has parts /a, /b, /c)
 const bytesPerPart = 10
 
@@ -133,19 +133,17 @@ func BenchmarkPathTrieGetPathKey(b *testing.B) {
 	}
 }
 
-
 // benchmark PathTrie's keySplit
 
 func BenchmarkKeySplitter(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for j := 0; j < b.N; j++ {
-		for part, i := keySplit(pathKeys[j%len(pathKeys)], 0);; part,i = keySplit(pathKeys[j%len(pathKeys)], i) {
-			var _ = part   // NoOp 'use' the key part
+		for part, i := keySplit(pathKeys[j%len(pathKeys)], 0); ; part, i = keySplit(pathKeys[j%len(pathKeys)], i) {
+			var _ = part // NoOp 'use' the key part
 			if i == -1 {
 				break
 			}
 		}
 	}
 }
-
