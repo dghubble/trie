@@ -4,7 +4,52 @@ import (
 	"testing"
 )
 
-func TestTrie(t *testing.T) {
+// RuneTrie
+
+func TestRuneTrie(t *testing.T) {
+	trie := NewRuneTrie()
+	testTrie(t, trie)
+}
+
+func TestRuneTrieNilBehavior(t *testing.T) {
+	trie := NewRuneTrie()
+	testNilBehavior(t, trie)
+}
+
+func TestRuneTrieRoot(t *testing.T) {
+	trie := NewRuneTrie()
+	testTrieRoot(t, trie)
+}
+
+func TestRuneTrieWalk(t *testing.T) {
+	trie := NewRuneTrie()
+	testTrieWalk(t, trie)
+}
+
+// PathTrie
+
+func TestPathTrie(t *testing.T) {
+	trie := NewPathTrie()
+	testTrie(t, trie)
+}
+
+func TestPathTrieNilBehavior(t *testing.T) {
+	trie := NewPathTrie()
+	testNilBehavior(t, trie)
+}
+
+func TestPathTrieRoot(t *testing.T) {
+	trie := NewPathTrie()
+	testTrieRoot(t, trie)
+}
+
+func TestPathTrieWalk(t *testing.T) {
+	trie := NewPathTrie()
+	testTrieWalk(t, trie)
+}
+
+
+func testTrie(t *testing.T, trie Trier) {
 	const firstPutValue = "first put"
 	cases := []struct { 
 		key string
@@ -15,10 +60,9 @@ func TestTrie(t *testing.T) {
 		{"/dog", 2},
 		{"/cats", 3},
 		{"/caterpillar", 4},
+		{"/cat/gideon", 5},
+		{"/cat/giddy", 6},
 	}
-
-	// initialize
-	trie := NewRuneTrie()
 
 	// get missing keys
 	for _, c := range cases {
@@ -71,7 +115,7 @@ func TestTrie(t *testing.T) {
 	}
 }
 
-func TestNilBehavior(t *testing.T) {
+func testNilBehavior(t *testing.T, trie Trier) {
 	cases := []struct { 
 		key string
 		value interface{}
@@ -81,9 +125,6 @@ func TestNilBehavior(t *testing.T) {
 		{"/caterpillar", nil},
 	}
 	expectNilValues := []string{"/", "/c", "/ca", "/caterpillar", "/other"}
-
-	// initialize
-	trie := NewRuneTrie()
 
 	// initial put
 	for _, c := range cases {
@@ -100,10 +141,9 @@ func TestNilBehavior(t *testing.T) {
 	}
 }
 
-func TestTrieRoot(t *testing.T) {
+func testTrieRoot(t *testing.T, trie Trier) {
 	const firstPutValue = "first put"
 	const putValue = "value"
-	trie := NewRuneTrie()
 
 	if value := trie.Get(""); value != nil {
 		t.Errorf("expected key '' to be missing, found value %v", value)
@@ -125,7 +165,7 @@ func TestTrieRoot(t *testing.T) {
 	}
 }
 
-func TestTrieWalk(t *testing.T) {
+func testTrieWalk(t *testing.T, trie Trier) {
 	table := map[string]interface{} {
 		"fish": 0,
 		"/cat": 1,
@@ -141,8 +181,6 @@ func TestTrieWalk(t *testing.T) {
 	for key, _ := range table {
 		walked[key] = 0
 	}
-
-	trie := NewRuneTrie()
 
 	for key, value := range table {
 		if isNew := trie.Put(key, value); !isNew {
@@ -167,39 +205,3 @@ func TestTrieWalk(t *testing.T) {
 		}
 	}
 }
-
-// splits keys into prefixes based on a separator
-
-func TestKeySpliter(t *testing.T) {
-	cases := []struct {
-		key string
-		parts []string
-	}{
-		{"", []string{""}},
-		{"/", []string{"/"}},
-		{"static_file", []string{"static_file"}},
-		{"/users/scott", []string{"/users", "/scott"}},
-		{"users/scott", []string{"users", "/scott"}},
-		{"/users/ramona/", []string{"/users", "/ramona", "/"}},
-		{"users/ramona/", []string{"users", "/ramona", "/"}},
-		{"//", []string{"/", "/"}},
-	}
-
-	for _, c := range cases {
-		partNum := 0
-		for prefix, i := keySplit(c.key, 0);; prefix,i = keySplit(c.key, i) {
-			if prefix != c.parts[partNum] {
-				t.Errorf("expected part %d of key '%s' to be '%s', got '%s'", partNum, c.key, c.parts[partNum], prefix)
-			}
-			partNum++
-			if i == -1  {
-				break
-			}
-		}
-		if partNum != len(c.parts) {
-			t.Errorf("expected '%s' to have %d parts, got %d", c.key, len(c.parts), partNum)
-		}
-	}
-}
-
-

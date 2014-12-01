@@ -55,10 +55,10 @@ func (trie *RuneTrie) Put(key string, value interface{}) bool {
 // node was found for the given key. If the node or any of its ancestors
 // becomes childless as a result, it is removed from the trie.
 func (trie *RuneTrie) Delete(key string) bool {
-	path := make([]pair, len(key)) // record ancestors to check later
+	path := make([]nodeRune, len(key)) // record ancestors to check later
 	node := trie
 	for i, r := range key {
-		path[i] = pair{r: r, node: node}
+		path[i] = nodeRune{r: r, node: node}
 		node = node.children[r]
 		if node == nil {
 			// node does not exist
@@ -92,7 +92,7 @@ func (trie *RuneTrie) Walk(walker WalkFunc) error {
 }
 
 // RuneTrie node and the rune key of the child the path descends into.
-type pair struct {
+type nodeRune struct {
 	node *RuneTrie
 	r rune
 }

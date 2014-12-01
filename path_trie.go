@@ -75,10 +75,10 @@ func (trie *PathTrie) Put(key string, value interface{}) bool {
 // node was found for the given key. If the node or any of its ancestors
 // becomes childless as a result, it is removed from the trie.
 func (trie *PathTrie) Delete(key string) bool {
-	path := make([]nodeStr, len(key)) // record ancestors to check later
+	path := make([]nodeStr, 0) // record ancestors to check later
 	node := trie
 	for part,i := keySplit(key, 0);; part,i = keySplit(key, i) {
-		path[i] = nodeStr{part: part, node: node}
+		path = append(path, nodeStr{part: part, node: node})
 		node = node.children[part]
 		if node == nil {
 			// node does not exist
@@ -93,7 +93,7 @@ func (trie *PathTrie) Delete(key string) bool {
 	// if leaf, remove it from its parent's children map. Repeat for ancestor path.
 	if node.isLeaf() {
 		// iterate backwards over path
-		for i := len(key) - 1; i >= 0; i-- {
+		for i := len(path) - 1; i >= 0; i-- {
 			parent := path[i].node
 			part := path[i].part
 			delete(parent.children, part)
