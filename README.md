@@ -16,25 +16,26 @@ Read the full documentation: [https://godoc.org/github.com/dghubble/trie](https:
 
 ## Performance
 
-These benchmarks Put and Get random string keys (30 bytes long).
+RuneTrie is a typical Trie which segments strings rune-wise (i.e. by unicode code point). These benchmarks perform Puts and Gets of random string keys that are 30 bytes long and of random '/' separated paths that have 3 parts and are 30 bytes long (longer if you count the '/' seps).
 
-    BenchmarkRuneTriePutStringKey  5000000    613 ns/op    1 B/op   0 allocs/op
-    BenchmarkRuneTrieGetStringKey  5000000    623 ns/op    0 B/op   0 allocs/op
-    BenchmarkPathTriePutStringKey  20000000   92.0 ns/op   0 B/op   0 allocs/op
-    BenchmarkPathTrieGetStringKey  20000000   96.3 ns/op   0 B/op   0 allocs/op
+    BenchmarkRuneTriePutStringKey    2000000      653 ns/op      2 B/op     0 allocs/op
+    BenchmarkRuneTrieGetStringKey    5000000      616 ns/op      0 B/op     0 allocs/op
+    BenchmarkRuneTriePutPathKey      5000000      704 ns/op      1 B/op     0 allocs/op
+    BenchmarkRuneTrieGetPathKey      5000000      682 ns/op      0 B/op     0 allocs/op
 
-Note that for random string keys without '/' separators, a PathTrie is effectively a map as every prefix is a direct child of the root.
+PathTrie segments strings by forward slash separators which can boost performance
+for some use cases. These benchmarks perform Puts and Gets of random string keys that are 30 bytes long and of random '/' separated paths that have 3 parts and are 30 bytes long (longer if you count the '/' seps).
 
-Putting and Getting paths with 3 slash separated parts, where each part is a string of 10 random bytes.
+    BenchmarkPathTriePutStringKey   20000000     94.2 ns/op      0 B/op     0 allocs/op
+    BenchmarkPathTrieGetStringKey   20000000     93.5 ns/op      0 B/op     0 allocs/op
+    BenchmarkPathTriePutPathKey     20000000      113 ns/op      0 B/op     0 allocs/op
+    BenchmarkPathTrieGetPathKey     20000000      108 ns/op      0 B/op     0 allocs/op
 
-    BenchmarkRuneTriePutPathKey    5000000    679 ns/op    1 B/op   0 allocs/op
-    BenchmarkRuneTrieGetPathKey    5000000    674 ns/op    0 B/op   0 allocs/op    
-    BenchmarkPathTriePutPathKey    20000000   111 ns/op    0 B/op   0 allocs/op
-    BenchmarkPathTrieGetPathKey    20000000   109 ns/op    0 B/op   0 allocs/op
+Note that for random string Puts and Gets, the PathTrie is effectively a map as every node is a direct child of the root (except for strings that happen to have a slash).
 
-Benchmark for the path key splitter used in the PathTrie.
-    
-    BenchmarkKeySplitter           50000000   58.7 ns/op   0 B/op   0 allocs/op
+This benchmark measures the performance of the PathSegmenter alone. It is used to segment random paths that have 3 '/' separated parts and are 30 bytes long.
+
+    BenchmarkPathSegmenter          50000000     58.8 ns/op      0 B/op     0 allocs/op
 
 ## License
 
