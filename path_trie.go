@@ -1,41 +1,32 @@
 package trie
 
-import (
-	"strings"
-)
-
 // PathTrie is a trie of paths with string keys and interface{} values.
-// Note that internal nodes have nil values so a stored nil value will not
-// be distinguishable and will not be included in Walks.
+
+// PathTrie is a trie of string keys and interface{} values. Internal nodes
+// have nil values so stored nil values cannot be distinguished and are
+// excluded from walks. By default, PathTrie will segment keys by forward
+// slashes with PathSegmenter (e.g. "/a/b/c" -> "/a", "/b", "/c"). A custom
+// StringSegmenter may be used to customize how strings are segmented into
+// nodes. A classic trie might segment keys by rune (i.e. unicode points).
 type PathTrie struct {
-	value    interface{}
-	children map[string]*PathTrie
+	segmenter StringSegmenter // key segmenter, must not cause heap allocs
+	value     interface{}
+	children  map[string]*PathTrie
 }
 
 // New allocates and returns a new *PathTrie.
 func NewPathTrie() *PathTrie {
 	return &PathTrie{
-		children: make(map[string]*PathTrie),
+		segmenter: PathSegmenter,
+		children:  make(map[string]*PathTrie),
 	}
-}
-
-// Part returns the next part of
-func keySplit(path string, start int) (segment string, next int) {
-	if len(path) == 0 {
-		return path, -1
-	}
-	end := strings.IndexRune(path[start+1:], '/')
-	if end == -1 {
-		return path[start:], -1
-	}
-	return path[start : start+end+1], start + end + 1
 }
 
 // Get returns the value stored at the given key. Returns nil for internal
 // nodes or for nodes with a value of nil.
 func (trie *PathTrie) Get(key string) interface{} {
 	node := trie
-	for part, i := keySplit(key, 0); ; part, i = keySplit(key, i) {
+	for part, i := trie.segmenter(key, 0); ; part, i = trie.segmenter(key, i) {
 		node = node.children[part]
 		if node == nil {
 			return nil
@@ -54,7 +45,7 @@ func (trie *PathTrie) Get(key string) interface{} {
 // be distinguishable and will not be included in Walks.
 func (trie *PathTrie) Put(key string, value interface{}) bool {
 	node := trie
-	for part, i := keySplit(key, 0); ; part, i = keySplit(key, i) {
+	for part, i := trie.segmenter(key, 0); ; part, i = trie.segmenter(key, i) {
 		child, _ := node.children[part]
 		if child == nil {
 			child = NewPathTrie()
@@ -77,7 +68,7 @@ func (trie *PathTrie) Put(key string, value interface{}) bool {
 func (trie *PathTrie) Delete(key string) bool {
 	path := make([]nodeStr, 0) // record ancestors to check later
 	node := trie
-	for part, i := keySplit(key, 0); ; part, i = keySplit(key, i) {
+	for part, i := trie.segmenter(key, 0); ; part, i = trie.segmenter(key, i) {
 		path = append(path, nodeStr{part: part, node: node})
 		node = node.children[part]
 		if node == nil {

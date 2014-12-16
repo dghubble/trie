@@ -63,7 +63,7 @@ func BenchmarkRuneTrieGetStringKey(b *testing.B) {
 	}
 }
 
-// string keys
+// path keys
 
 func BenchmarkRuneTriePutPathKey(b *testing.B) {
 	trie := NewRuneTrie()
@@ -89,6 +89,8 @@ func BenchmarkRuneTrieGetPathKey(b *testing.B) {
 // PathTrie
 ///////////////////////////////////////////////////////////////////////////////
 
+// string keys
+
 func BenchmarkPathTriePutStringKey(b *testing.B) {
 	trie := NewPathTrie()
 	b.ResetTimer()
@@ -110,7 +112,7 @@ func BenchmarkPathTrieGetStringKey(b *testing.B) {
 	}
 }
 
-// string keys
+// path keys
 
 func BenchmarkPathTriePutPathKey(b *testing.B) {
 	trie := NewPathTrie()
@@ -133,13 +135,13 @@ func BenchmarkPathTrieGetPathKey(b *testing.B) {
 	}
 }
 
-// benchmark PathTrie's keySplit
+// benchmark PathSegmenter
 
-func BenchmarkKeySplitter(b *testing.B) {
+func BenchmarkPathSegmenter(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for j := 0; j < b.N; j++ {
-		for part, i := keySplit(pathKeys[j%len(pathKeys)], 0); ; part, i = keySplit(pathKeys[j%len(pathKeys)], i) {
+		for part, i := PathSegmenter(pathKeys[j%len(pathKeys)], 0); ; part, i = PathSegmenter(pathKeys[j%len(pathKeys)], i) {
 			var _ = part // NoOp 'use' the key part
 			if i == -1 {
 				break

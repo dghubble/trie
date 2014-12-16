@@ -1,7 +1,5 @@
 package trie
 
-type WalkFunc func(key string, value interface{}) error
-
 // RuneTrie is a trie of runes with string keys and interface{} values.
 // Note that internal nodes have nil values so a stored nil value will not
 // be distinguishable and will not be included in Walks.
