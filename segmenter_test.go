@@ -41,3 +41,34 @@ func TestPathSegmenter(t *testing.T) {
 		}
 	}
 }
+
+func TestPathSegmenterEdgeCases(t *testing.T) {
+	cases := []struct {
+		path      string
+		start     int
+		segment   string
+		nextIndex int
+	}{
+		{"", 0, "", -1},
+		{"", 10, "", -1},
+		{"/", 0, "/", -1},
+		{"/", 10, "", -1},
+		{"/", -10, "", -1},
+		{"/", 1, "", -1},
+		{"//", 0, "/", 1},
+		{"//", 1, "/", -1},
+		{"//", 2, "", -1},
+		{" /", 0, " ", 1},
+		{" /", 1, "/", -1},
+	}
+
+	for _, c := range cases {
+		segment, nextIndex := PathSegmenter(c.path, c.start)
+		if segment != c.segment {
+			t.Errorf("expected segment %s starting at %d in path %s, got %s", c.segment, c.start, c.path, segment)
+		}
+		if nextIndex != c.nextIndex {
+			t.Errorf("expected nextIndex %d starting at %d in path %s, got %d", c.nextIndex, c.start, c.path, nextIndex)
+		}
+	}
+}
