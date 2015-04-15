@@ -1,4 +1,4 @@
-# Trie [![Build Status](https://travis-ci.org/dghubble/trie.png)](https://travis-ci.org/dghubble/trie) [![GoDoc](http://godoc.org/github.com/dghubble/trie?status.png)](http://godoc.org/github.com/dghubble/trie)
+# Trie [![Build Status](https://travis-ci.org/dghubble/trie.png)](https://travis-ci.org/dghubble/trie) [![Coverage](http://gocover.io/_badge/github.com/dghubble/trie)](http://gocover.io/github.com/dghubble/trie) [![GoDoc](http://godoc.org/github.com/dghubble/trie?status.png)](http://godoc.org/github.com/dghubble/trie)
 
 Trie implements several types of Tries (e.g. rune-wise, path-wise). The implementations are optimized for ``Get`` performance and to allocate 0 bytes of heap memory (i.e. garbage) per Get.
 
@@ -12,7 +12,7 @@ When Tries are chosen over maps, it is typically for their space efficiency. How
 
 ## Documentation
 
-Read the full documentation: [https://godoc.org/github.com/dghubble/trie](https://godoc.org/github.com/dghubble/trie)
+Read [Godoc](https://godoc.org/github.com/dghubble/trie)
 
 ## Performance
 
