@@ -4,11 +4,11 @@ import (
 	"strings"
 )
 
-// A WalkFunc defines some action to take on the given key and value during
+// WalkFunc defines some action to take on the given key and value during
 // a Trie Walk. Returning a non-nil error will terminate the Walk.
 type WalkFunc func(key string, value interface{}) error
 
-// A Segmenter function takes a string key with a starting index and returns
+// StringSegmenter takes a string key with a starting index and returns
 // the first segment after the start and the ending index. When the end is
 // reached, the returned nextIndex should be -1.
 // Implementations should NOT allocate heap memory as Trie Segmentors are

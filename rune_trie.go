@@ -8,7 +8,7 @@ type RuneTrie struct {
 	children map[rune]*RuneTrie
 }
 
-// New allocates and returns a new *RuneTrie.
+// NewRuneTrie allocates and returns a new *RuneTrie.
 func NewRuneTrie() *RuneTrie {
 	return &RuneTrie{
 		children: make(map[rune]*RuneTrie),

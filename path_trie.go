@@ -14,7 +14,7 @@ type PathTrie struct {
 	children  map[string]*PathTrie
 }
 
-// New allocates and returns a new *PathTrie.
+// NewPathTrie allocates and returns a new *PathTrie.
 func NewPathTrie() *PathTrie {
 	return &PathTrie{
 		segmenter: PathSegmenter,
@@ -66,7 +66,7 @@ func (trie *PathTrie) Put(key string, value interface{}) bool {
 // node was found for the given key. If the node or any of its ancestors
 // becomes childless as a result, it is removed from the trie.
 func (trie *PathTrie) Delete(key string) bool {
-	path := make([]nodeStr, 0) // record ancestors to check later
+	var path []nodeStr // record ancestors to check later
 	node := trie
 	for part, i := trie.segmenter(key, 0); ; part, i = trie.segmenter(key, i) {
 		path = append(path, nodeStr{part: part, node: node})

@@ -177,7 +177,7 @@ func testTrieWalk(t *testing.T, trie Trier) {
 	}
 	// key -> times walked
 	walked := make(map[string]int)
-	for key, _ := range table {
+	for key := range table {
 		walked[key] = 0
 	}
 
@@ -192,7 +192,7 @@ func testTrieWalk(t *testing.T, trie Trier) {
 		if value != table[key] {
 			t.Errorf("expected key %s to have value %v, got %v", key, table[key], value)
 		}
-		walked[key] += 1
+		walked[key]++
 		return nil
 	}
 	trie.Walk(walker)
