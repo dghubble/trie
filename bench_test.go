@@ -25,7 +25,7 @@ func init() {
 	// path keys
 	for i := 0; i < len(pathKeys); i++ {
 		var key string
-		for i := 0; i < partsPerKey; i++ {
+		for j := 0; j < partsPerKey; j++ {
 			key += "/"
 			part := make([]byte, bytesPerPart)
 			if _, err := rand.Read(part); err != nil {
@@ -33,7 +33,7 @@ func init() {
 			}
 			key += string(part)
 		}
-		pathKeys[i] = string(key)
+		pathKeys[i] = key
 	}
 }
 
