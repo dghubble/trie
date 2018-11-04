@@ -1,6 +1,7 @@
 package trie
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -26,6 +27,11 @@ func TestRuneTrieWalk(t *testing.T) {
 	testTrieWalk(t, trie)
 }
 
+func TestRuneTrieWalkError(t *testing.T) {
+	trie := NewRuneTrie()
+	testTrieWalkError(t, trie)
+}
+
 // PathTrie
 
 func TestPathTrie(t *testing.T) {
@@ -46,6 +52,11 @@ func TestPathTrieRoot(t *testing.T) {
 func TestPathTrieWalk(t *testing.T) {
 	trie := NewPathTrie()
 	testTrieWalk(t, trie)
+}
+
+func TestPathTrieWalkError(t *testing.T) {
+	trie := NewPathTrie()
+	testTrieWalkError(t, trie)
 }
 
 func testTrie(t *testing.T, trie Trier) {
@@ -202,5 +213,35 @@ func testTrieWalk(t *testing.T, trie Trier) {
 		if walkedCount != 1 {
 			t.Errorf("expected key %s to be walked exactly once, got %v", key, walkedCount)
 		}
+	}
+}
+
+func testTrieWalkError(t *testing.T, trie Trier) {
+	table := map[string]interface{}{
+		"/L1/L2A":        1,
+		"/L1/L2B/L3A":    2,
+		"/L1/L2B/L3B/L4": 42,
+		"/L1/L2B/L3C":    4,
+		"/L1/L2C":        5,
+	}
+
+	walkerError := errors.New("walker error")
+	walked := 0
+
+	for key, value := range table {
+		trie.Put(key, value)
+	}
+	walker := func(key string, value interface{}) error {
+		if value == 42 {
+			return walkerError
+		}
+		walked++
+		return nil
+	}
+	if err := trie.Walk(walker); err != walkerError {
+		t.Errorf("expected walker error not generated, got %v", err)
+	}
+	if len(table) == walked {
+		t.Errorf("expected nodes walked < %d, got %d", len(table), walked)
 	}
 }
