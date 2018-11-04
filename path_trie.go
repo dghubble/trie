@@ -113,11 +113,12 @@ type nodeStr struct {
 
 func (trie *PathTrie) walk(key string, walker WalkFunc) error {
 	if trie.value != nil {
-		walker(key, trie.value)
+		if err := walker(key, trie.value); err != nil {
+			return err
+		}
 	}
 	for part, child := range trie.children {
-		err := child.walk(key+part, walker)
-		if err != nil {
+		if err := child.walk(key+part, walker); err != nil {
 			return err
 		}
 	}
