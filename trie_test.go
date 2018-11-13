@@ -206,7 +206,9 @@ func testTrieWalk(t *testing.T, trie Trier) {
 		walked[key]++
 		return nil
 	}
-	trie.Walk(walker)
+	if err := trie.Walk(walker); err != nil {
+		t.Errorf("expected error nil, got %v", err)
+	}
 
 	// each key/value walked exactly once
 	for key, walkedCount := range walked {
