@@ -21,20 +21,20 @@ Read [Godoc](https://godoc.org/github.com/dghubble/trie)
 RuneTrie is a typical Trie which segments strings rune-wise (i.e. by unicode code point). These benchmarks perform Puts and Gets of random string keys that are 30 bytes long and of random '/' separated paths that have 3 parts and are 30 bytes long (longer if you count the '/' seps).
 
 ```
-BenchmarkRuneTriePutStringKey    2000000      653 ns/op      2 B/op     0 allocs/op
-BenchmarkRuneTrieGetStringKey    5000000      616 ns/op      0 B/op     0 allocs/op
-BenchmarkRuneTriePutPathKey      5000000      704 ns/op      1 B/op     0 allocs/op
-BenchmarkRuneTrieGetPathKey      5000000      682 ns/op      0 B/op     0 allocs/op
+BenchmarkRuneTriePutStringKey-8   3000000    437 ns/op     9 B/op     1 allocs/op
+BenchmarkRuneTrieGetStringKey-8   3000000    411 ns/op     0 B/op     0 allocs/op
+BenchmarkRuneTriePutPathKey-8     3000000    464 ns/op     9 B/op     1 allocs/op
+BenchmarkRuneTrieGetPathKey-8     3000000    429 ns/op     0 B/op     0 allocs/op
 ```
 
 PathTrie segments strings by forward slash separators which can boost performance
 for some use cases. These benchmarks perform Puts and Gets of random string keys that are 30 bytes long and of random '/' separated paths that have 3 parts and are 30 bytes long (longer if you count the '/' seps).
 
 ```
-BenchmarkPathTriePutStringKey   20000000     94.2 ns/op      0 B/op     0 allocs/op
-BenchmarkPathTrieGetStringKey   20000000     93.5 ns/op      0 B/op     0 allocs/op
-BenchmarkPathTriePutPathKey     20000000      113 ns/op      0 B/op     0 allocs/op
-BenchmarkPathTrieGetPathKey     20000000      108 ns/op      0 B/op     0 allocs/op
+BenchmarkPathTriePutStringKey-8   30000000   55.5 ns/op    8 B/op     1 allocs/op
+BenchmarkPathTrieGetStringKey-8   50000000   37.9 ns/op    0 B/op     0 allocs/op
+BenchmarkPathTriePutPathKey-8     20000000   88.7 ns/op    8 B/op     1 allocs/op
+BenchmarkPathTrieGetPathKey-8     20000000   68.6 ns/op    0 B/op     0 allocs/op
 ```
 
 Note that for random string Puts and Gets, the PathTrie is effectively a map as every node is a direct child of the root (except for strings that happen to have a slash).
@@ -42,7 +42,7 @@ Note that for random string Puts and Gets, the PathTrie is effectively a map as 
 This benchmark measures the performance of the PathSegmenter alone. It is used to segment random paths that have 3 '/' separated parts and are 30 bytes long.
 
 ```
-BenchmarkPathSegmenter          50000000     58.8 ns/op      0 B/op     0 allocs/op
+BenchmarkPathSegmenter-8          50000000   32.0 ns/op    0 B/op     0 allocs/op
 ```
 
 ## License
