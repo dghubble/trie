@@ -7,7 +7,7 @@ test:
 
 .PHONY: vet
 vet:
-	@go vet -all -shadow ./...
+	@go vet -all ./...
 
 .PHONY: lint
 lint:
