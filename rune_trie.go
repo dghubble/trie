@@ -15,6 +15,11 @@ func NewRuneTrie() *RuneTrie {
 	}
 }
 
+// Value returns the value at the current trie node
+func (trie *RuneTrie) Value() interface{} {
+	return trie.value
+}
+
 // Get returns the value stored at the given key. Returns nil for internal
 // nodes or for nodes with a value of nil.
 func (trie *RuneTrie) Get(key string) interface{} {
@@ -79,6 +84,19 @@ func (trie *RuneTrie) Delete(key string) bool {
 		}
 	}
 	return true // node (internal or not) existed and its value was nil'd
+}
+
+// Node returns the trie node with the given key.
+// Returns nil if the node with the given key is not found
+func (trie *RuneTrie) Node(key string) Trier {
+	node := trie
+	for _, r := range key {
+		node = node.children[r]
+		if node == nil {
+			return nil
+		}
+	}
+	return node
 }
 
 // Walk iterates over each key/value stored in the trie and calls the given

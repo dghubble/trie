@@ -2,6 +2,7 @@ package trie
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 )
 
@@ -32,6 +33,11 @@ func TestRuneTrieWalkError(t *testing.T) {
 	testTrieWalkError(t, trie)
 }
 
+func TestRuneSubTrie(t *testing.T) {
+	trie := NewRuneTrie()
+	testSubTrie(t, trie)
+}
+
 // PathTrie
 
 func TestPathTrie(t *testing.T) {
@@ -59,6 +65,11 @@ func TestPathTrieWalkError(t *testing.T) {
 	testTrieWalkError(t, trie)
 }
 
+func TestPathSubTrie(t *testing.T) {
+	trie := NewPathTrie()
+	testSubTrie(t, trie)
+}
+
 func testTrie(t *testing.T, trie Trier) {
 	const firstPutValue = "first put"
 	cases := []struct {
@@ -78,6 +89,10 @@ func testTrie(t *testing.T, trie Trier) {
 	for _, c := range cases {
 		if value := trie.Get(c.key); value != nil {
 			t.Errorf("expected key %s to be missing, found value %v", c.key, value)
+		}
+
+		if node := trie.Node(c.key); node != nil {
+			t.Errorf("expected key %s to be missing, found node %v", c.key, node)
 		}
 	}
 
@@ -99,6 +114,10 @@ func testTrie(t *testing.T, trie Trier) {
 	for _, c := range cases {
 		if value := trie.Get(c.key); value != c.value {
 			t.Errorf("expected key %s to have value %v, got %v", c.key, c.value, value)
+		}
+
+		if node := trie.Node(c.key); node.Value() != c.value {
+			t.Errorf("expected node %s to have value %v got %v", c.key, c.value, node.Value())
 		}
 	}
 
@@ -245,5 +264,51 @@ func testTrieWalkError(t *testing.T, trie Trier) {
 	}
 	if len(table) == walked {
 		t.Errorf("expected nodes walked < %d, got %d", len(table), walked)
+	}
+}
+
+func testSubTrie(t *testing.T, trie Trier) {
+	table := map[string]interface{}{
+		"/L1/L2A":        1,
+		"/L1/L2B":        2,
+		"/L1/L2B/L3A":    3,
+		"/L1/L2B/L3B/L4": 4,
+		"/L1/L2B/L3C":    5,
+	}
+
+	for key, value := range table {
+		trie.Put(key, value)
+	}
+
+	node := trie.Node("/L1/L2B")
+
+	if node == nil {
+		t.Fatalf("expected node at path '/L1/L2B' to not be nil")
+	}
+
+	if got, want := node.Value().(int), 2; got != want {
+		t.Errorf("expected node value at path '/L1/L2B' to be %v, got %v", want, got)
+	}
+
+	expectedWalk := map[string]interface{}{
+		"":        2,
+		"/L3A":    3,
+		"/L3B/L4": 4,
+		"/L3C":    5,
+	}
+
+	actualWalk := map[string]interface{}{}
+
+	walker := func(key string, value interface{}) error {
+		actualWalk[key] = value
+		return nil
+	}
+
+	if err := node.Walk(walker); err != nil {
+		t.Fatalf("unexpected error walking trie: %v", err)
+	}
+
+	if !reflect.DeepEqual(expectedWalk, actualWalk) {
+		t.Errorf("expected walk %v, got: %v", expectedWalk, actualWalk)
 	}
 }
