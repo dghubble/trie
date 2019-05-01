@@ -8,4 +8,5 @@ type Trier interface {
 	Walk(walker WalkFunc) error
 	Value() interface{}
 	Node(key string) Trier
+	Children() []Trier
 }

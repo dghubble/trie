@@ -312,3 +312,74 @@ func testSubTrie(t *testing.T, trie Trier) {
 		t.Errorf("expected walk %v, got: %v", expectedWalk, actualWalk)
 	}
 }
+
+func TestPathTrieChildren(t *testing.T) {
+	cases := []childTest{
+		{node: "", want: 1},               // children - /L1
+		{node: "/L1", want: 2},            // children - /L2A, /L2B
+		{node: "/L1/L2A", want: 0},        // children - none
+		{node: "/L1/L2B", want: 3},        // children - /L3A, /L3B, /L3C
+		{node: "/L1/L2B/L3A", want: 0},    // children - none
+		{node: "/L1/L2B/L3B", want: 1},    // children - /L4
+		{node: "/L1/L2B/L3B/L4", want: 0}, // children - none
+		{node: "/L1/L2B/L3C", want: 0},    // children - none
+	}
+
+	testTrieChildren(t, NewPathTrie(), cases)
+}
+
+func TestRuneTrieChildren(t *testing.T) {
+	cases := []childTest{
+		{node: "", want: 1},
+		{node: "/", want: 1},
+		{node: "/L", want: 1},
+		{node: "/L1", want: 1},
+		{node: "/L1/", want: 1},
+		{node: "/L1/L", want: 1},
+		{node: "/L1/L2", want: 2},
+		{node: "/L1/L2A", want: 0},
+		{node: "/L1/L2B", want: 1},
+		{node: "/L1/L2B/L3", want: 3},
+		// Omitting full traversal since the cases
+		// are covered above
+	}
+
+	testTrieChildren(t, NewRuneTrie(), cases)
+}
+
+func testTrieChildren(t *testing.T, trie Trier, cases []childTest) {
+	table := map[string]interface{}{
+		"/L1/L2A":        1,
+		"/L1/L2B":        2,
+		"/L1/L2B/L3A":    3,
+		"/L1/L2B/L3B/L4": 4,
+		"/L1/L2B/L3C":    5,
+	}
+
+	for key, value := range table {
+		trie.Put(key, value)
+	}
+
+	for _, c := range cases {
+		t.Run(c.node, func(t *testing.T) {
+			node := trie
+			if c.node != "" {
+				node = trie.Node(c.node)
+			}
+
+			if node == nil {
+				t.Fatalf("node %q should not be nil", c.node)
+			}
+			kids := node.Children()
+
+			if got, want := len(kids), c.want; got != want {
+				t.Errorf("expected children count to be %v, got %v", want, got)
+			}
+		})
+	}
+}
+
+type childTest struct {
+	node string
+	want int
+}

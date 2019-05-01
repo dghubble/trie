@@ -15,6 +15,16 @@ func NewRuneTrie() *RuneTrie {
 	}
 }
 
+// Children returns the immediate children at the current trie node
+func (trie *RuneTrie) Children() []Trier {
+	kids := make([]Trier, 0, len(trie.children))
+	for _, v := range trie.children {
+		kids = append(kids, v)
+	}
+
+	return kids
+}
+
 // Value returns the value at the current trie node
 func (trie *RuneTrie) Value() interface{} {
 	return trie.value

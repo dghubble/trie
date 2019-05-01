@@ -27,6 +27,16 @@ func (trie *PathTrie) Value() interface{} {
 	return trie.value
 }
 
+// Children returns the immediate children at the current trie node
+func (trie *PathTrie) Children() []Trier {
+	kids := make([]Trier, 0, len(trie.children))
+	for _, v := range trie.children {
+		kids = append(kids, v)
+	}
+
+	return kids
+}
+
 // Get returns the value stored at the given key. Returns nil for internal
 // nodes or for nodes with a value of nil.
 func (trie *PathTrie) Get(key string) interface{} {
