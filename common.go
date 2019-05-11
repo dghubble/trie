@@ -11,8 +11,8 @@ type WalkFunc func(key string, value interface{}) error
 // StringSegmenter takes a string key with a starting index and returns
 // the first segment after the start and the ending index. When the end is
 // reached, the returned nextIndex should be -1.
-// Implementations should NOT allocate heap memory as Trie Segmentors are
-// called upon Gets. See PathSegmentor.
+// Implementations should NOT allocate heap memory as Trie Segmenters are
+// called upon Gets. See PathSegmenter.
 type StringSegmenter func(key string, start int) (segment string, nextIndex int)
 
 // PathSegmenter segments string key paths by slash separators. For example,
