@@ -1,6 +1,7 @@
 package trie
 
 import (
+	"bytes"
 	"errors"
 	"testing"
 )
@@ -245,5 +246,57 @@ func testTrieWalkError(t *testing.T, trie Trier) {
 	}
 	if len(table) == walked {
 		t.Errorf("expected nodes walked < %d, got %d", len(table), walked)
+	}
+}
+
+func TestSaveRuneTrie(t *testing.T) {
+	tr := NewRuneTrie()
+	var buf []byte
+	buffer := bytes.NewBuffer(buf)
+
+	for i, k := range stringKeys {
+		tr.Put(k, i)
+	}
+	err := tr.Save(buffer)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	tr2, err := LoadRuneTrie(buffer)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	for i, k := range stringKeys {
+		if v := tr2.Get(k); v.(int) != i {
+			t.Errorf("Expected key >%s< to be >%d< but got >%v<", k, i, v)
+		}
+	}
+}
+
+func TestSavePathTrie(t *testing.T) {
+	tr := NewPathTrie()
+	var buf []byte
+	buffer := bytes.NewBuffer(buf)
+
+	for i, k := range stringKeys {
+		tr.Put(k, i)
+	}
+	err := tr.Save(buffer)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	tr2, err := LoadPathTrie(buffer)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	for i, k := range stringKeys {
+		if v := tr2.Get(k); v.(int) != i {
+			t.Errorf("Expected key >%s< to be >%d< but got >%v<", k, i, v)
+		}
 	}
 }
