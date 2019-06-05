@@ -19,11 +19,17 @@ func NewRuneTrie() *RuneTrie {
 // nodes or for nodes with a value of nil.
 func (trie *RuneTrie) Get(key string) interface{} {
 	node := trie
-	for _, r := range key {
+	prevNode := node
+	for idx, r := range key {
 		node = node.children[r]
 		if node == nil {
+			// sfx additional condition to return prev value
+			if idx > 0 && key[idx-1] == '.' {
+				return prevNode.value
+			}
 			return nil
 		}
+		prevNode = node
 	}
 	return node.value
 }

@@ -72,3 +72,13 @@ func TestPathSegmenterEdgeCases(t *testing.T) {
 		}
 	}
 }
+
+func TestSetSegmenter(t *testing.T) {
+	if segmenter != '/' {
+		t.Error("default segmenter should be '/'")
+	}
+	SetSegmenter('.')
+	if segmenter != '.' {
+		t.Error("after calling set segmenter new segmenter should be '.'")
+	}
+}

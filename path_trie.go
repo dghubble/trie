@@ -26,14 +26,24 @@ func NewPathTrie() *PathTrie {
 // nodes or for nodes with a value of nil.
 func (trie *PathTrie) Get(key string) interface{} {
 	node := trie
+	var prevPart string
+	var prevNode *PathTrie
 	for part, i := trie.segmenter(key, 0); ; part, i = trie.segmenter(key, i) {
 		node = node.children[part]
 		if node == nil {
+			// sfx additional condition to return prev value
+			if len(part) > 0 && len(prevPart) > 0 {
+				if prevPart[0] == part[0] {
+					return prevNode.children[string(part[0])].value
+				}
+			}
 			return nil
 		}
 		if i == -1 {
 			break
 		}
+		prevNode = node
+		prevPart = part
 	}
 	return node.value
 }
