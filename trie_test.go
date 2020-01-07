@@ -2,6 +2,7 @@ package trie
 
 import (
 	"errors"
+	"strings"
 	"testing"
 )
 
@@ -99,6 +100,25 @@ func testTrie(t *testing.T, trie Trier) {
 	for _, c := range cases {
 		if value := trie.Get(c.key); value != c.value {
 			t.Errorf("expected key %s to have value %v, got %v", c.key, c.value, value)
+		}
+	}
+
+	// get path
+	key := cases[6].key
+	var expectValues []interface{}
+	for _, c := range cases {
+		// If c.key is a prefix of key, then expect c.value.
+		if strings.HasPrefix(key, c.key) {
+			expectValues = append(expectValues, c.value)
+		}
+	}
+	values := trie.GetPath(key)
+	if len(values) != len(expectValues) {
+		t.Errorf("expected %d values, got %d", len(expectValues), len(values))
+	}
+	for i := range expectValues {
+		if values[i] != expectValues[i] {
+			t.Errorf("expected value %v at position %d, got %v", expectValues[i], i, values[i])
 		}
 	}
 

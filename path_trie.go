@@ -38,6 +38,27 @@ func (trie *PathTrie) Get(key string) interface{} {
 	return node.value
 }
 
+// GetPath returns all values stored at each node in the path from the root to
+// the given key. Does not return values for internal nodes or a nodes with a
+// nil value.
+func (trie *PathTrie) GetPath(key string) []interface{} {
+	var values []interface{}
+	node := trie
+	for part, i := trie.segmenter(key, 0); ; part, i = trie.segmenter(key, i) {
+		node = node.children[part]
+		if node == nil {
+			return nil
+		}
+		if node.value != nil {
+			values = append(values, node.value)
+		}
+		if i == -1 {
+			break
+		}
+	}
+	return values
+}
+
 // Put inserts the value into the trie at the given key, replacing any
 // existing items. It returns true if the put adds a new value, false
 // if it replaces an existing value.
