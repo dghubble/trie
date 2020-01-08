@@ -115,10 +115,11 @@ func testTrie(t *testing.T, trie Trier) {
 	values := trie.GetPath(key)
 	if len(values) != len(expectValues) {
 		t.Errorf("expected %d values, got %d", len(expectValues), len(values))
-	}
-	for i := range expectValues {
-		if values[i] != expectValues[i] {
-			t.Errorf("expected value %v at position %d, got %v", expectValues[i], i, values[i])
+	} else {
+		for i := range expectValues {
+			if values[i] != expectValues[i] {
+				t.Errorf("expected value %v at position %d, got %v", expectValues[i], i, values[i])
+			}
 		}
 	}
 

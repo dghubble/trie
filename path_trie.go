@@ -39,7 +39,7 @@ func (trie *PathTrie) Get(key string) interface{} {
 }
 
 // GetPath returns all values stored at each node in the path from the root to
-// the given key. Does not return values for internal nodes or a nodes with a
+// the given key. Does not return values for internal nodes or for nodes with a
 // nil value.
 func (trie *PathTrie) GetPath(key string) []interface{} {
 	var values []interface{}
