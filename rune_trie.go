@@ -10,9 +10,7 @@ type RuneTrie struct {
 
 // NewRuneTrie allocates and returns a new *RuneTrie.
 func NewRuneTrie() *RuneTrie {
-	return &RuneTrie{
-		children: make(map[rune]*RuneTrie),
-	}
+	return new(RuneTrie)
 }
 
 // Get returns the value stored at the given key. Returns nil for internal
@@ -38,7 +36,10 @@ func (trie *RuneTrie) Put(key string, value interface{}) bool {
 	for _, r := range key {
 		child, _ := node.children[r]
 		if child == nil {
-			child = NewRuneTrie()
+			if node.children == nil {
+				node.children = map[rune]*RuneTrie{}
+			}
+			child = new(RuneTrie)
 			node.children[r] = child
 		}
 		node = child
@@ -65,15 +66,21 @@ func (trie *RuneTrie) Delete(key string) bool {
 	}
 	// delete the node value
 	node.value = nil
-	// if leaf, remove it from its parent's children map. Repeat for ancestor path.
+	// if leaf, remove it from its parent's children map. Repeat for ancestor
+	// path.
 	if node.isLeaf() {
 		// iterate backwards over path
 		for i := len(key) - 1; i >= 0; i-- {
 			parent := path[i].node
 			r := path[i].r
 			delete(parent.children, r)
-			if parent.value != nil || !parent.isLeaf() {
-				// parent has a value or has other children, stop
+			if !parent.isLeaf() {
+				// parent has other children, stop
+				break
+			}
+			parent.children = nil
+			if parent.value != nil {
+				// parent has a value, stop
 				break
 			}
 		}
