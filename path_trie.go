@@ -18,7 +18,6 @@ type PathTrie struct {
 func NewPathTrie() *PathTrie {
 	return &PathTrie{
 		segmenter: PathSegmenter,
-		children:  make(map[string]*PathTrie),
 	}
 }
 
@@ -48,6 +47,9 @@ func (trie *PathTrie) Put(key string, value interface{}) bool {
 	for part, i := trie.segmenter(key, 0); ; part, i = trie.segmenter(key, i) {
 		child, _ := node.children[part]
 		if child == nil {
+			if node.children == nil {
+				node.children = map[string]*PathTrie{}
+			}
 			child = NewPathTrie()
 			node.children[part] = child
 		}
@@ -88,8 +90,13 @@ func (trie *PathTrie) Delete(key string) bool {
 			parent := path[i].node
 			part := path[i].part
 			delete(parent.children, part)
-			if parent.value != nil || !parent.isLeaf() {
-				// parent has a value or has other children, stop
+			if !parent.isLeaf() {
+				// parent has other children, stop
+				break
+			}
+			parent.children = nil
+			if parent.value != nil {
+				// parent has a value, stop
 				break
 			}
 		}
