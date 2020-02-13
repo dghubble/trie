@@ -25,13 +25,10 @@ func NewPathTrie() *PathTrie {
 // nodes or for nodes with a value of nil.
 func (trie *PathTrie) Get(key string) interface{} {
 	node := trie
-	for part, i := trie.segmenter(key, 0); ; part, i = trie.segmenter(key, i) {
+	for part, i := trie.segmenter(key, 0); part != ""; part, i = trie.segmenter(key, i) {
 		node = node.children[part]
 		if node == nil {
 			return nil
-		}
-		if i == -1 {
-			break
 		}
 	}
 	return node.value
@@ -44,7 +41,7 @@ func (trie *PathTrie) Get(key string) interface{} {
 // be distinguishable and will not be included in Walks.
 func (trie *PathTrie) Put(key string, value interface{}) bool {
 	node := trie
-	for part, i := trie.segmenter(key, 0); ; part, i = trie.segmenter(key, i) {
+	for part, i := trie.segmenter(key, 0); part != ""; part, i = trie.segmenter(key, i) {
 		child, _ := node.children[part]
 		if child == nil {
 			if node.children == nil {
@@ -54,9 +51,6 @@ func (trie *PathTrie) Put(key string, value interface{}) bool {
 			node.children[part] = child
 		}
 		node = child
-		if i == -1 {
-			break
-		}
 	}
 	// does node have an existing value?
 	isNewVal := node.value == nil
@@ -70,15 +64,12 @@ func (trie *PathTrie) Put(key string, value interface{}) bool {
 func (trie *PathTrie) Delete(key string) bool {
 	var path []nodeStr // record ancestors to check later
 	node := trie
-	for part, i := trie.segmenter(key, 0); ; part, i = trie.segmenter(key, i) {
+	for part, i := trie.segmenter(key, 0); part != ""; part, i = trie.segmenter(key, i) {
 		path = append(path, nodeStr{part: part, node: node})
 		node = node.children[part]
 		if node == nil {
 			// node does not exist
 			return false
-		}
-		if i == -1 {
-			break
 		}
 	}
 	// delete the node value

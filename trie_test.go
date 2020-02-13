@@ -20,6 +20,15 @@ func TestRuneTrieNilBehavior(t *testing.T) {
 func TestRuneTrieRoot(t *testing.T) {
 	trie := NewRuneTrie()
 	testTrieRoot(t, trie)
+
+	trie = NewRuneTrie()
+	if !trie.isLeaf() {
+		t.Error("root of empty tree should be leaf")
+	}
+	trie.Put("", "root")
+	if !trie.isLeaf() {
+		t.Error("root should not have children, only value")
+	}
 }
 
 func TestRuneTrieWalk(t *testing.T) {
@@ -47,6 +56,15 @@ func TestPathTrieNilBehavior(t *testing.T) {
 func TestPathTrieRoot(t *testing.T) {
 	trie := NewPathTrie()
 	testTrieRoot(t, trie)
+
+	trie = NewPathTrie()
+	if !trie.isLeaf() {
+		t.Error("root of empty tree should be leaf")
+	}
+	trie.Put("", "root")
+	if !trie.isLeaf() {
+		t.Error("root should not have children, only value")
+	}
 }
 
 func TestPathTrieWalk(t *testing.T) {
@@ -177,6 +195,7 @@ func testTrieRoot(t *testing.T, trie Trier) {
 
 func testTrieWalk(t *testing.T, trie Trier) {
 	table := map[string]interface{}{
+		"":             -1,
 		"fish":         0,
 		"/cat":         1,
 		"/dog":         2,
