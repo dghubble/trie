@@ -6,4 +6,5 @@ type Trier interface {
 	Put(key string, value interface{}) bool
 	Delete(key string) bool
 	Walk(walker WalkFunc) error
+	WalkPath(key string, walker WalkFunc) error
 }

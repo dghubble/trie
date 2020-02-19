@@ -41,6 +41,16 @@ func TestRuneTrieWalkError(t *testing.T) {
 	testTrieWalkError(t, trie)
 }
 
+func TestRuneTrieWalkPath(t *testing.T) {
+	trie := NewRuneTrie()
+	testTrieWalkPath(t, trie)
+}
+
+func TestRuneTrieWalkPathError(t *testing.T) {
+	trie := NewRuneTrie()
+	testTrieWalkPathError(t, trie)
+}
+
 // PathTrie
 
 func TestPathTrie(t *testing.T) {
@@ -75,6 +85,16 @@ func TestPathTrieWalk(t *testing.T) {
 func TestPathTrieWalkError(t *testing.T) {
 	trie := NewPathTrie()
 	testTrieWalkError(t, trie)
+}
+
+func TestPathTrieWalkPath(t *testing.T) {
+	trie := NewPathTrie()
+	testTrieWalkPath(t, trie)
+}
+
+func TestPathTrieWalkPathError(t *testing.T) {
+	trie := NewPathTrie()
+	testTrieWalkPathError(t, trie)
 }
 
 func testTrie(t *testing.T, trie Trier) {
@@ -264,5 +284,149 @@ func testTrieWalkError(t *testing.T, trie Trier) {
 	}
 	if len(table) == walked {
 		t.Errorf("expected nodes walked < %d, got %d", len(table), walked)
+	}
+}
+
+func testTrieWalkPath(t *testing.T, trie Trier) {
+	table := map[string]interface{}{
+		"fish":             0,
+		"/cat":             1,
+		"/dog":             2,
+		"/cats":            3,
+		"/caterpillar":     4,
+		"/notes":           30,
+		"/notes/new":       31,
+		"/notes/new/noise": 32,
+	}
+	// key -> times walked
+	walked := make(map[string]int)
+	for key := range table {
+		walked[key] = 0
+	}
+
+	for key, value := range table {
+		if isNew := trie.Put(key, value); !isNew {
+			t.Errorf("expected key %s to be missing", key)
+		}
+	}
+
+	walker := func(key string, value interface{}) error {
+		// value for each walked key is correct
+		if value != table[key] {
+			t.Errorf("expected key %s to have value %v, got %v", key, table[key], value)
+		}
+		walked[key]++
+		return nil
+	}
+	if err := trie.WalkPath("/notes/new/noise", walker); err != nil {
+		t.Errorf("expected error nil, got %v", err)
+	}
+
+	// expect each key/value in path walked exactly once, and not other keys
+	for key, walkedCount := range walked {
+		switch key {
+		case "/notes", "/notes/new", "/notes/new/noise":
+			if walkedCount != 1 {
+				t.Errorf("expected key %s to be walked exactly once, got %v", key, walkedCount)
+			}
+		default:
+			if walkedCount != 0 {
+				t.Errorf("expected key %s to not be walked, got %v", key, walkedCount)
+			}
+		}
+	}
+
+	for key := range table {
+		walked[key] = 0
+	}
+	if err := trie.WalkPath("/notes/new/nose", walker); err != nil {
+		t.Errorf("expected error nil, got %v", err)
+	}
+	// expect each key/value in path walked exactly once, and not other keys
+	for key, walkedCount := range walked {
+		switch key {
+		case "/notes", "/notes/new":
+			if walkedCount != 1 {
+				t.Errorf("expected key %s to be walked exactly once, got %v", key, walkedCount)
+			}
+		default:
+			if walkedCount != 0 {
+				t.Errorf("expected key %s to not be walked, got %v", key, walkedCount)
+			}
+		}
+	}
+
+	var foundRoot bool
+	trie.Put("", "ROOT")
+	trie.WalkPath("/notes/new/noise", func(key string, value interface{}) error {
+		if key == "" && value == "ROOT" {
+			foundRoot = true
+		}
+		return nil
+	})
+	if !foundRoot {
+		t.Error("did not find root")
+	}
+}
+
+func testTrieWalkPathError(t *testing.T, trie Trier) {
+	table := map[string]interface{}{
+		"/L1/L2A":        1,
+		"/L1/L2A/L3B":    99,
+		"/L1/L2A/L3B/L4": 2,
+		"/L1/L2B/L3B":    3,
+		"/L1/L2C":        4,
+	}
+
+	walkerError := errors.New("walker error")
+
+	walked := make(map[string]int)
+	for key := range table {
+		walked[key] = 0
+	}
+
+	for key, value := range table {
+		trie.Put(key, value)
+	}
+	walker := func(key string, value interface{}) error {
+		if value == 99 {
+			return walkerError
+		}
+		walked[key]++
+		return nil
+	}
+	if err := trie.WalkPath("/L1/L2A/L3B", walker); err != walkerError {
+		t.Errorf("expected walker error, got %v", err)
+	}
+	// expect each key/value in path, up to error and not including key with
+	// value 99, walked exactly once, and not other keys
+	var walkedTotal int
+	for key, walkedCount := range walked {
+		switch key {
+		case "/L1/L2A":
+			if walkedCount != 1 {
+				t.Errorf("expected key %s to be walked exactly once, got %v", key, walkedCount)
+			}
+			walkedTotal++
+		default:
+			if walkedCount != 0 {
+				t.Errorf("expected key %s to not be walked, got %v", key, walkedCount)
+			}
+		}
+	}
+	if walkedTotal != 1 {
+		t.Errorf("expected 1 nodes walked, got %d", walkedTotal)
+	}
+
+	rootError := errors.New("error at root")
+	trie.Put("", "ROOT")
+	err := trie.WalkPath("/L1/L2A/L3B/L4", func(key string, value interface{}) error {
+		if key == "" && value == "ROOT" {
+			return rootError
+		}
+		return nil
+	})
+	if err != rootError {
+		t.Errorf("expected %s, got %s", rootError, err)
 	}
 }

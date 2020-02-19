@@ -103,6 +103,38 @@ func (trie *PathTrie) Walk(walker WalkFunc) error {
 	return trie.walk("", walker)
 }
 
+// WalkPath iterates over each key/value in the path in trie from the root to
+// the node at the given key, calling the given walker function for each
+// key/value. If the walker function returns an error, the walk is aborted.
+func (trie *PathTrie) WalkPath(key string, walker WalkFunc) error {
+	// Get root value if one exists.
+	if trie.value != nil {
+		if err := walker("", trie.value); err != nil {
+			return err
+		}
+	}
+	for part, i := trie.segmenter(key, 0); ; part, i = trie.segmenter(key, i) {
+		if trie = trie.children[part]; trie == nil {
+			return nil
+		}
+		if trie.value != nil {
+			var k string
+			if i == -1 {
+				k = key
+			} else {
+				k = key[0:i]
+			}
+			if err := walker(k, trie.value); err != nil {
+				return err
+			}
+		}
+		if i == -1 {
+			break
+		}
+	}
+	return nil
+}
+
 // PathTrie node and the part string key of the child the path descends into.
 type nodeStr struct {
 	node *PathTrie
