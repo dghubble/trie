@@ -21,6 +21,14 @@ func NewPathTrie() *PathTrie {
 	}
 }
 
+// NewPathTrieWithSegmenter allocates and returns a new *PathTrie with the given StringSegmenter implementation
+// other than PathSegmenter.
+func NewPathTrieWithSegmenter(segmenter StringSegmenter) *PathTrie {
+	return &PathTrie{
+		segmenter: segmenter,
+	}
+}
+
 // Get returns the value stored at the given key. Returns nil for internal
 // nodes or for nodes with a value of nil.
 func (trie *PathTrie) Get(key string) interface{} {
