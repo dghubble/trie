@@ -14,10 +14,29 @@ type PathTrie struct {
 	children  map[string]*PathTrie
 }
 
+// Config for building a path trie
+type PathTrieConfig struct {
+	segmenter StringSegmenter
+}
+
 // NewPathTrie allocates and returns a new *PathTrie.
-func NewPathTrie() *PathTrie {
+func NewPathTrie(configs ...PathTrieConfig) *PathTrie {
+	var segmenter StringSegmenter
+	for _, config := range configs {
+		if config.segmenter != nil {
+			// first config with valid StringSegmenter wins
+			segmenter = config.segmenter
+			break
+		}
+	}
+
+	// if there's no config passed, or no config has a valid StringSegmenter, fallback to default impl, PathSegmenter
+	if segmenter == nil {
+		segmenter = PathSegmenter
+	}
+
 	return &PathTrie{
-		segmenter: PathSegmenter,
+		segmenter: segmenter,
 	}
 }
 
