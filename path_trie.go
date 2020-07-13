@@ -14,7 +14,7 @@ type PathTrie struct {
 	children  map[string]*PathTrie
 }
 
-// Config for building a path trie
+// PathTrieConfig for building a path trie with different segmenter
 type PathTrieConfig struct {
 	segmenter StringSegmenter
 }
