@@ -16,20 +16,19 @@ type PathTrie struct {
 
 // PathTrieConfig for building a path trie with different segmenter
 type PathTrieConfig struct {
-	segmenter StringSegmenter
+	Segmenter StringSegmenter
 }
 
 // NewPathTrie allocates and returns a new *PathTrie.
-func NewPathTrie(configs ...PathTrieConfig) *PathTrie {
-	var segmenter StringSegmenter
-	for _, config := range configs {
-		if config.segmenter != nil {
-			// first config with valid StringSegmenter wins
-			segmenter = config.segmenter
-			break
-		}
+func NewPathTrie() *PathTrie {
+	return &PathTrie{
+		segmenter: PathSegmenter,
 	}
+}
 
+// NewPathTrieWithConfig allocates and returns a new *PathTrie with the given *PathTrieConfig
+func NewPathTrieWithConfig(config *PathTrieConfig) *PathTrie {
+	segmenter := config.Segmenter
 	// if there's no config passed, or no config has a valid StringSegmenter, fallback to default impl, PathSegmenter
 	if segmenter == nil {
 		segmenter = PathSegmenter
