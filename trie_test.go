@@ -63,6 +63,11 @@ func TestPathTrieWithNilConfig(t *testing.T) {
 	testTrie(t, trie)
 }
 
+func TestPathTrieWithEmptyConfig(t *testing.T) {
+	trie := NewPathTrieWithConfig(&PathTrieConfig{})
+	testTrie(t, trie)
+}
+
 func TestPathTrieWithConfig(t *testing.T) {
 	trie := NewPathTrieWithConfig(&PathTrieConfig{PathSegmenter})
 	testTrie(t, trie)

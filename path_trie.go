@@ -28,10 +28,9 @@ func NewPathTrie() *PathTrie {
 
 // NewPathTrieWithConfig allocates and returns a new *PathTrie with the given *PathTrieConfig
 func NewPathTrieWithConfig(config *PathTrieConfig) *PathTrie {
-	segmenter := config.Segmenter
-	// if there's no config passed, or no config has a valid StringSegmenter, fallback to default impl, PathSegmenter
-	if segmenter == nil {
-		segmenter = PathSegmenter
+	segmenter := PathSegmenter
+	if config != nil && config.Segmenter != nil {
+		segmenter = config.Segmenter
 	}
 
 	return &PathTrie{
