@@ -34,6 +34,18 @@ func NewPathTrie(config *PathTrieConfig) *PathTrie {
 	}
 }
 
+// NewPathTrieWithConfig allocates and returns a new *PathTrie with the given *PathTrieConfig
+func NewPathTrieWithConfig(config *PathTrieConfig) *PathTrie {
+	segmenter := PathSegmenter
+	if config != nil && config.Segmenter != nil {
+		segmenter = config.Segmenter
+	}
+
+	return &PathTrie{
+		segmenter: segmenter,
+	}
+}
+
 // Get returns the value stored at the given key. Returns nil for internal
 // nodes or for nodes with a value of nil.
 func (trie *PathTrie) Get(key string) interface{} {
