@@ -20,14 +20,10 @@ type PathTrieConfig struct {
 }
 
 // NewPathTrie allocates and returns a new *PathTrie.
-func NewPathTrie() *PathTrie {
-	return &PathTrie{
-		segmenter: PathSegmenter,
-	}
-}
-
-// NewPathTrieWithConfig allocates and returns a new *PathTrie with the given *PathTrieConfig
-func NewPathTrieWithConfig(config *PathTrieConfig) *PathTrie {
+// Now it is possible to pass in a customized StringSegmenter via PathTrieConfig.
+// If nil is passed in, then the default StringSegmenter - PathSegmenter will be
+// used.
+func NewPathTrie(config *PathTrieConfig) *PathTrie {
 	segmenter := PathSegmenter
 	if config != nil && config.Segmenter != nil {
 		segmenter = config.Segmenter
@@ -64,7 +60,7 @@ func (trie *PathTrie) Put(key string, value interface{}) bool {
 			if node.children == nil {
 				node.children = map[string]*PathTrie{}
 			}
-			child = NewPathTrie()
+			child = NewPathTrie(&PathTrieConfig{trie.segmenter})
 			node.children[part] = child
 		}
 		node = child

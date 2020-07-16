@@ -54,35 +54,30 @@ func TestRuneTrieWalkPathError(t *testing.T) {
 // PathTrie
 
 func TestPathTrie(t *testing.T) {
-	trie := NewPathTrie()
-	testTrie(t, trie)
-}
-
-func TestPathTrieWithNilConfig(t *testing.T) {
-	trie := NewPathTrieWithConfig(nil)
+	trie := NewPathTrie(nil)
 	testTrie(t, trie)
 }
 
 func TestPathTrieWithEmptyConfig(t *testing.T) {
-	trie := NewPathTrieWithConfig(&PathTrieConfig{})
+	trie := NewPathTrie(&PathTrieConfig{})
 	testTrie(t, trie)
 }
 
 func TestPathTrieWithConfig(t *testing.T) {
-	trie := NewPathTrieWithConfig(&PathTrieConfig{PathSegmenter})
+	trie := NewPathTrie(&PathTrieConfig{PathSegmenter})
 	testTrie(t, trie)
 }
 
 func TestPathTrieNilBehavior(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie(nil)
 	testNilBehavior(t, trie)
 }
 
 func TestPathTrieRoot(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie(nil)
 	testTrieRoot(t, trie)
 
-	trie = NewPathTrie()
+	trie = NewPathTrie(nil)
 	if !trie.isLeaf() {
 		t.Error("root of empty tree should be leaf")
 	}
@@ -93,22 +88,22 @@ func TestPathTrieRoot(t *testing.T) {
 }
 
 func TestPathTrieWalk(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie(nil)
 	testTrieWalk(t, trie)
 }
 
 func TestPathTrieWalkError(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie(nil)
 	testTrieWalkError(t, trie)
 }
 
 func TestPathTrieWalkPath(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie(nil)
 	testTrieWalkPath(t, trie)
 }
 
 func TestPathTrieWalkPathError(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie(nil)
 	testTrieWalkPathError(t, trie)
 }
 
