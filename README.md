@@ -1,10 +1,10 @@
-# Trie [![Build Status](https://travis-ci.org/dghubble/trie.svg?branch=master)](https://travis-ci.org/dghubble/trie) [![Coverage](https://gocover.io/_badge/github.com/dghubble/trie)](https://gocover.io/github.com/dghubble/trie) [![GoDoc](https://godoc.org/github.com/dghubble/trie?status.svg)](https://godoc.org/github.com/dghubble/trie)
+# Trie [![Build Status](https://github.com/dghubble/trie/workflows/test/badge.svg)](https://github.com/dghubble/trie/actions?query=workflow%3Atest+branch%3Amaster) [![Coverage](https://gocover.io/_badge/github.com/dghubble/trie)](https://gocover.io/github.com/dghubble/trie) [![GoDoc](https://godoc.org/github.com/dghubble/trie?status.svg)](https://godoc.org/github.com/dghubble/trie)
 
 Package `trie` implements rune-wise and path-wise [Tries](https://en.wikipedia.org/wiki/Trie) optimized for `Get` performance and to allocate 0 bytes of heap memory (i.e. garbage) per `Get`.
 
 A typical use case is to perform any `Put` or `Delete` operations upfront to populate the trie, then perform `Get` operations very quickly. The Tries do not synchronize access (not thread-safe).
 
-When Tries are chosen over maps, it is typically for their space efficiency. However, in situations where direct key lookup is not possible (e.g. routers), tries can provide faster lookups and avoid key iteration. 
+When Tries are chosen over maps, it is typically for their space efficiency. However, in situations where direct key lookup is not possible (e.g. routers), tries can provide faster lookups and avoid key iteration.
 
 ## Install
 
