@@ -1,6 +1,7 @@
 package trie
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -71,4 +72,51 @@ func TestPathSegmenterEdgeCases(t *testing.T) {
 			t.Errorf("expected nextIndex %d starting at %d in path %s, got %d", c.nextIndex, c.start, c.path, nextIndex)
 		}
 	}
+}
+
+func testPathSegmenterDot(path string, start int) (segment string, next int) {
+	if len(path) == 0 || start < 0 || start > len(path)-1 {
+		return "", -1
+	}
+	end := strings.IndexRune(path[start+1:], '.')
+	if end == -1 {
+		return path[start:], -1
+	}
+	return path[start : start+end+1], start + end + 1
+}
+
+func TestCustomPathSegmenter(t *testing.T) {
+	depthTest := map[string]bool{
+		"a":          false,
+		"a.b":        false,
+		"a.b.c":      false,
+		"a.b.c.d":    false,
+		"a.b.c.d.e":  false,
+		".a":         false,
+		".a.b":       false,
+		".a.b.c":     false,
+		".a.b.c.d":   false,
+		".a.b.c.d.e": false,
+	}
+
+	tie := NewPathTrieWithConfig(&PathTrieConfig{Segmenter: testPathSegmenterDot})
+	for k := range depthTest {
+		tie.Put(k, true)
+	}
+
+	for k := range depthTest {
+		tie.WalkPath(k, func(k string, v interface{}) error {
+			out := tie.Get(k)
+			if out != nil {
+				depthTest[k] = true
+			}
+			return nil
+		})
+	}
+	for k, ok := range depthTest {
+		if !ok {
+			t.Errorf("did not walk thru %s node", k)
+		}
+	}
+
 }
