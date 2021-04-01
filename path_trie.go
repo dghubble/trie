@@ -38,6 +38,13 @@ func NewPathTrieWithConfig(config *PathTrieConfig) *PathTrie {
 	}
 }
 
+// newPathTrieFromTrie returns new trie while preserving its config
+func (trie *PathTrie) newPathTrie() *PathTrie {
+	return &PathTrie{
+		segmenter: trie.segmenter,
+	}
+}
+
 // Get returns the value stored at the given key. Returns nil for internal
 // nodes or for nodes with a value of nil.
 func (trie *PathTrie) Get(key string) interface{} {
@@ -64,7 +71,7 @@ func (trie *PathTrie) Put(key string, value interface{}) bool {
 			if node.children == nil {
 				node.children = map[string]*PathTrie{}
 			}
-			child = NewPathTrie()
+			child = trie.newPathTrie()
 			node.children[part] = child
 		}
 		node = child
