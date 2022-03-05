@@ -125,6 +125,8 @@ func testTrie(t *testing.T, trie Trier) {
 		{"/caterpillar", 4},
 		{"/cat/gideon", 5},
 		{"/cat/giddy", 6},
+		{"مسار", 7},
+		{"這是第三個值", 8},
 	}
 
 	// get missing keys

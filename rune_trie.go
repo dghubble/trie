@@ -71,9 +71,9 @@ func (trie *RuneTrie) Delete(key string) bool {
 	if node.isLeaf() {
 		// iterate backwards over path
 		for i := len(key) - 1; i >= 0; i-- {
-      if path[i].node == nil {
-        continue
-      }
+			if path[i].node == nil {
+				continue
+			}
 			parent := path[i].node
 			r := path[i].r
 			delete(parent.children, r)
