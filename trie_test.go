@@ -50,6 +50,39 @@ func TestRuneTrieWalkPathError(t *testing.T) {
 	trie := NewRuneTrie()
 	testTrieWalkPathError(t, trie)
 }
+func TestRuneTrieLongtestPrefix(t *testing.T) {
+	trie := NewRuneTrie()
+	for _, c := range []struct {
+		key   string
+		value interface{}
+	}{
+		{"/cat", 1},
+		{"/cats", 3},
+		{"cat", nil},
+		{"/cat/gideon", 5},
+		{"/cat/gideon/abc", 6},
+	} {
+		trie.Put(c.key, c.value)
+	}
+
+	for _, c := range []struct {
+		key   string
+		value interface{}
+	}{
+		{"/cat", 1},
+		{"/cats", 3},
+		{"/cate", 1},
+		{"cat", nil},
+		{"/cat/gideon", 5},
+		{"/cat/gideon/abc", 6},
+		{"/cat/gideons", 5},
+	} {
+		v := trie.LongestPrefix(c.key)
+		if v != c.value {
+			t.Errorf("find longest matching %s expected: %v, got: %v", c.key, c.value, v)
+		}
+	}
+}
 
 // PathTrie
 
@@ -112,6 +145,40 @@ func TestPathTrieWalkPathError(t *testing.T) {
 	testTrieWalkPathError(t, trie)
 }
 
+func TestPathTrieLongtestPrefix(t *testing.T) {
+	trie := NewPathTrie()
+	for _, c := range []struct {
+		key   string
+		value interface{}
+	}{
+		{"/cat", 1},
+		{"/cats", 3},
+		{"cat", nil},
+		{"/cat/gideon", 5},
+		{"/cat/gideon/abc", 6},
+	} {
+		trie.Put(c.key, c.value)
+	}
+
+	for _, c := range []struct {
+		key   string
+		value interface{}
+	}{
+		{"/cat", 1},
+		{"/cats", 3},
+		{"/cate", nil},
+		{"cat", nil},
+		{"/cat/gideon", 5},
+		{"/cat/gideon/abc", 6},
+		{"/cat/gideons", 1},
+	} {
+		v := trie.LongestPrefix(c.key)
+		if v != c.value {
+			t.Errorf("find longest matching %s expected: %v, got: %v", c.key, c.value, v)
+		}
+	}
+}
+
 func testTrie(t *testing.T, trie Trier) {
 	const firstPutValue = "first put"
 	cases := []struct {
@@ -152,6 +219,22 @@ func testTrie(t *testing.T, trie Trier) {
 	for _, c := range cases {
 		if value := trie.Get(c.key); value != c.value {
 			t.Errorf("expected key %s to have value %v, got %v", c.key, c.value, value)
+		}
+	}
+
+	for _, c := range []struct {
+		key   string
+		value interface{}
+	}{
+		{"/cat", 1},
+		{"/cats", 3},
+		{"cat", nil},
+		{"/cat/gideon", 5},
+		{"/cat/gideon/abc", 5},
+	} {
+		v := trie.LongestPrefix(c.key)
+		if v != c.value {
+			t.Errorf("find longest matching %s expected: %v, got: %v", c.key, c.value, v)
 		}
 	}
 

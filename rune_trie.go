@@ -26,6 +26,25 @@ func (trie *RuneTrie) Get(key string) interface{} {
 	return node.value
 }
 
+// LongestPrefix returns the value with longest key that has a prefix in common with the key. If no match is found, nil is returned.
+func (trie *RuneTrie) LongestPrefix(key string) interface{} {
+	var longest *RuneTrie
+	node := trie
+	for _, r := range key {
+		node = node.children[r]
+		if node == nil {
+			break
+		}
+		if node.value != nil {
+			longest = node
+		}
+	}
+	if longest == nil {
+		return nil
+	}
+	return longest.value
+}
+
 // Put inserts the value into the trie at the given key, replacing any
 // existing items. It returns true if the put adds a new value, false
 // if it replaces an existing value.
