@@ -66,7 +66,7 @@ func (trie *PathTrie) Get(key string) interface{} {
 func (trie *PathTrie) Put(key string, value interface{}) bool {
 	node := trie
 	for part, i := trie.segmenter(key, 0); part != ""; part, i = trie.segmenter(key, i) {
-		child, _ := node.children[part]
+		child := node.children[part]
 		if child == nil {
 			if node.children == nil {
 				node.children = map[string]*PathTrie{}
