@@ -6,7 +6,7 @@ import (
 
 // WalkFunc defines some action to take on the given key and value during
 // a Trie Walk. Returning a non-nil error will terminate the Walk.
-type WalkFunc func(key string, value interface{}) error
+type WalkFunc[T any] func(key string, value T) error
 
 // StringSegmenter takes a string key with a starting index and returns
 // the first segment after the start and the ending index. When the end is
@@ -27,4 +27,11 @@ func PathSegmenter(path string, start int) (segment string, next int) {
 		return path[start:], -1
 	}
 	return path[start : start+end+1], start + end + 1
+}
+
+// zeroValueOfT returns the zero value of type T. For example, the
+// empty string ("") for string, 0 for int, nil for pointers, etc.
+func zeroValueOfT[T any]() T {
+	var t T
+	return t
 }

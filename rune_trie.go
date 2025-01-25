@@ -1,29 +1,30 @@
 package trie
 
-// RuneTrie is a trie of runes with string keys and interface{} values.
-// Note that internal nodes have nil values so a stored nil value will not
-// be distinguishable and will not be included in Walks.
-type RuneTrie struct {
-	value    interface{}
-	children map[rune]*RuneTrie
+// runeTrie is a trie of runes with string keys and generic type values.
+type runeTrie[T any] struct {
+	value    *T
+	children map[rune]*runeTrie[T]
 }
 
-// NewRuneTrie allocates and returns a new *RuneTrie.
-func NewRuneTrie() *RuneTrie {
-	return new(RuneTrie)
+// NewRuneTrie allocates and returns a new rune implementation of Trie.
+func NewRuneTrie[T any]() Trie[T] {
+	return new(runeTrie[T])
 }
 
 // Get returns the value stored at the given key. Returns nil for internal
 // nodes or for nodes with a value of nil.
-func (trie *RuneTrie) Get(key string) interface{} {
+func (trie *runeTrie[T]) Get(key string) (T, bool) {
 	node := trie
 	for _, r := range key {
 		node = node.children[r]
 		if node == nil {
-			return nil
+			return zeroValueOfT[T](), false
 		}
 	}
-	return node.value
+	if node.value == nil {
+		return zeroValueOfT[T](), false
+	}
+	return *node.value, true
 }
 
 // Put inserts the value into the trie at the given key, replacing any
@@ -31,33 +32,33 @@ func (trie *RuneTrie) Get(key string) interface{} {
 // if it replaces an existing value.
 // Note that internal nodes have nil values so a stored nil value will not
 // be distinguishable and will not be included in Walks.
-func (trie *RuneTrie) Put(key string, value interface{}) bool {
+func (trie *runeTrie[T]) Put(key string, value T) bool {
 	node := trie
 	for _, r := range key {
 		child := node.children[r]
 		if child == nil {
 			if node.children == nil {
-				node.children = map[rune]*RuneTrie{}
+				node.children = map[rune]*runeTrie[T]{}
 			}
-			child = new(RuneTrie)
+			child = new(runeTrie[T])
 			node.children[r] = child
 		}
 		node = child
 	}
 	// does node have an existing value?
 	isNewVal := node.value == nil
-	node.value = value
+	node.value = &value
 	return isNewVal
 }
 
 // Delete removes the value associated with the given key. Returns true if a
 // node was found for the given key. If the node or any of its ancestors
 // becomes childless as a result, it is removed from the trie.
-func (trie *RuneTrie) Delete(key string) bool {
-	path := make([]nodeRune, len(key)) // record ancestors to check later
+func (trie *runeTrie[T]) Delete(key string) bool {
+	path := make([]nodeRune[T], len(key)) // record ancestors to check later
 	node := trie
 	for i, r := range key {
-		path[i] = nodeRune{r: r, node: node}
+		path[i] = nodeRune[T]{r: r, node: node}
 		node = node.children[r]
 		if node == nil {
 			// node does not exist
@@ -95,17 +96,17 @@ func (trie *RuneTrie) Delete(key string) bool {
 // walker function with the key and value. If the walker function returns
 // an error, the walk is aborted.
 // The traversal is depth first with no guaranteed order.
-func (trie *RuneTrie) Walk(walker WalkFunc) error {
+func (trie *runeTrie[T]) Walk(walker WalkFunc[T]) error {
 	return trie.walk("", walker)
 }
 
 // WalkPath iterates over each key/value in the path in trie from the root to
 // the node at the given key, calling the given walker function for each
 // key/value. If the walker function returns an error, the walk is aborted.
-func (trie *RuneTrie) WalkPath(key string, walker WalkFunc) error {
+func (trie *runeTrie[T]) WalkPath(key string, walker WalkFunc[T]) error {
 	// Get root value if one exists.
 	if trie.value != nil {
-		if err := walker("", trie.value); err != nil {
+		if err := walker("", *trie.value); err != nil {
 			return err
 		}
 	}
@@ -115,7 +116,7 @@ func (trie *RuneTrie) WalkPath(key string, walker WalkFunc) error {
 			return nil
 		}
 		if trie.value != nil {
-			if err := walker(string(key[0:i+1]), trie.value); err != nil {
+			if err := walker(string(key[0:i+1]), *trie.value); err != nil {
 				return err
 			}
 		}
@@ -124,14 +125,14 @@ func (trie *RuneTrie) WalkPath(key string, walker WalkFunc) error {
 }
 
 // RuneTrie node and the rune key of the child the path descends into.
-type nodeRune struct {
-	node *RuneTrie
+type nodeRune[T any] struct {
+	node *runeTrie[T]
 	r    rune
 }
 
-func (trie *RuneTrie) walk(key string, walker WalkFunc) error {
+func (trie *runeTrie[T]) walk(key string, walker WalkFunc[T]) error {
 	if trie.value != nil {
-		if err := walker(key, trie.value); err != nil {
+		if err := walker(key, *trie.value); err != nil {
 			return err
 		}
 	}
@@ -143,6 +144,6 @@ func (trie *RuneTrie) walk(key string, walker WalkFunc) error {
 	return nil
 }
 
-func (trie *RuneTrie) isLeaf() bool {
+func (trie *runeTrie[T]) isLeaf() bool {
 	return len(trie.children) == 0
 }

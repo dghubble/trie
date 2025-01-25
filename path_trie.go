@@ -1,61 +1,58 @@
 package trie
 
-// PathTrie is a trie of paths with string keys and interface{} values.
+// pathTrie is a trie of paths with string keys and generic type values.
 
-// PathTrie is a trie of string keys and interface{} values. Internal nodes
-// have nil values so stored nil values cannot be distinguished and are
-// excluded from walks. By default, PathTrie will segment keys by forward
-// slashes with PathSegmenter (e.g. "/a/b/c" -> "/a", "/b", "/c"). A custom
-// StringSegmenter may be used to customize how strings are segmented into
-// nodes. A classic trie might segment keys by rune (i.e. unicode points).
-type PathTrie struct {
+// pathTrie is a trie of string keys and generic type values. By default
+// PathTrie will segment keys by forward slashes with PathSegmenter
+// (e.g. "/a/b/c" -> "/a", "/b", "/c"). A custom StringSegmenter may be
+// used to customize how strings are segmented into nodes. A classic
+// trie might segment keys by rune (i.e. unicode points).
+type pathTrie[T any] struct {
 	segmenter StringSegmenter // key segmenter, must not cause heap allocs
-	value     interface{}
-	children  map[string]*PathTrie
+	value     *T
+	children  map[string]*pathTrie[T]
 }
 
-// PathTrieConfig for building a path trie with different segmenter
-type PathTrieConfig struct {
-	Segmenter StringSegmenter
+// PathTrieOption is an optional configuration option for a path trie.
+type PathTrieOption[T any] func(*pathTrie[T])
+
+// WithSegmenter sets a non-default StringSegmenter on the path trie.
+func WithSegmenter[T any](s StringSegmenter) PathTrieOption[T] {
+	return func(trie *pathTrie[T]) { trie.segmenter = s }
 }
 
-// NewPathTrie allocates and returns a new *PathTrie.
-func NewPathTrie() *PathTrie {
-	return &PathTrie{
+// NewPathTrie allocates and returns a new path implementation of Trie.
+func NewPathTrie[T any](opts ...PathTrieOption[T]) Trie[T] {
+	trie := &pathTrie[T]{
 		segmenter: PathSegmenter,
 	}
-}
-
-// NewPathTrieWithConfig allocates and returns a new *PathTrie with the given *PathTrieConfig
-func NewPathTrieWithConfig(config *PathTrieConfig) *PathTrie {
-	segmenter := PathSegmenter
-	if config != nil && config.Segmenter != nil {
-		segmenter = config.Segmenter
+	for _, opt := range opts {
+		opt(trie)
 	}
-
-	return &PathTrie{
-		segmenter: segmenter,
-	}
+	return trie
 }
 
 // newPathTrieFromTrie returns new trie while preserving its config
-func (trie *PathTrie) newPathTrie() *PathTrie {
-	return &PathTrie{
+func (trie *pathTrie[T]) newPathTrieFromTrie() *pathTrie[T] {
+	return &pathTrie[T]{
 		segmenter: trie.segmenter,
 	}
 }
 
 // Get returns the value stored at the given key. Returns nil for internal
 // nodes or for nodes with a value of nil.
-func (trie *PathTrie) Get(key string) interface{} {
+func (trie *pathTrie[T]) Get(key string) (T, bool) {
 	node := trie
 	for part, i := trie.segmenter(key, 0); part != ""; part, i = trie.segmenter(key, i) {
 		node = node.children[part]
 		if node == nil {
-			return nil
+			return zeroValueOfT[T](), false
 		}
 	}
-	return node.value
+	if node.value == nil {
+		return zeroValueOfT[T](), false
+	}
+	return *node.value, true
 }
 
 // Put inserts the value into the trie at the given key, replacing any
@@ -63,33 +60,33 @@ func (trie *PathTrie) Get(key string) interface{} {
 // if it replaces an existing value.
 // Note that internal nodes have nil values so a stored nil value will not
 // be distinguishable and will not be included in Walks.
-func (trie *PathTrie) Put(key string, value interface{}) bool {
+func (trie *pathTrie[T]) Put(key string, value T) bool {
 	node := trie
 	for part, i := trie.segmenter(key, 0); part != ""; part, i = trie.segmenter(key, i) {
 		child := node.children[part]
 		if child == nil {
 			if node.children == nil {
-				node.children = map[string]*PathTrie{}
+				node.children = map[string]*pathTrie[T]{}
 			}
-			child = trie.newPathTrie()
+			child = trie.newPathTrieFromTrie()
 			node.children[part] = child
 		}
 		node = child
 	}
 	// does node have an existing value?
 	isNewVal := node.value == nil
-	node.value = value
+	node.value = &value
 	return isNewVal
 }
 
 // Delete removes the value associated with the given key. Returns true if a
 // node was found for the given key. If the node or any of its ancestors
 // becomes childless as a result, it is removed from the trie.
-func (trie *PathTrie) Delete(key string) bool {
-	var path []nodeStr // record ancestors to check later
+func (trie *pathTrie[T]) Delete(key string) bool {
+	var path []nodeStr[T] // record ancestors to check later
 	node := trie
 	for part, i := trie.segmenter(key, 0); part != ""; part, i = trie.segmenter(key, i) {
-		path = append(path, nodeStr{part: part, node: node})
+		path = append(path, nodeStr[T]{part: part, node: node})
 		node = node.children[part]
 		if node == nil {
 			// node does not exist
@@ -123,17 +120,17 @@ func (trie *PathTrie) Delete(key string) bool {
 // walker function with the key and value. If the walker function returns
 // an error, the walk is aborted.
 // The traversal is depth first with no guaranteed order.
-func (trie *PathTrie) Walk(walker WalkFunc) error {
+func (trie *pathTrie[T]) Walk(walker WalkFunc[T]) error {
 	return trie.walk("", walker)
 }
 
 // WalkPath iterates over each key/value in the path in trie from the root to
 // the node at the given key, calling the given walker function for each
 // key/value. If the walker function returns an error, the walk is aborted.
-func (trie *PathTrie) WalkPath(key string, walker WalkFunc) error {
+func (trie *pathTrie[T]) WalkPath(key string, walker WalkFunc[T]) error {
 	// Get root value if one exists.
 	if trie.value != nil {
-		if err := walker("", trie.value); err != nil {
+		if err := walker("", *trie.value); err != nil {
 			return err
 		}
 	}
@@ -148,7 +145,7 @@ func (trie *PathTrie) WalkPath(key string, walker WalkFunc) error {
 			} else {
 				k = key[0:i]
 			}
-			if err := walker(k, trie.value); err != nil {
+			if err := walker(k, *trie.value); err != nil {
 				return err
 			}
 		}
@@ -160,14 +157,14 @@ func (trie *PathTrie) WalkPath(key string, walker WalkFunc) error {
 }
 
 // PathTrie node and the part string key of the child the path descends into.
-type nodeStr struct {
-	node *PathTrie
+type nodeStr[T any] struct {
+	node *pathTrie[T]
 	part string
 }
 
-func (trie *PathTrie) walk(key string, walker WalkFunc) error {
+func (trie *pathTrie[T]) walk(key string, walker WalkFunc[T]) error {
 	if trie.value != nil {
-		if err := walker(key, trie.value); err != nil {
+		if err := walker(key, *trie.value); err != nil {
 			return err
 		}
 	}
@@ -179,6 +176,6 @@ func (trie *PathTrie) walk(key string, walker WalkFunc) error {
 	return nil
 }
 
-func (trie *PathTrie) isLeaf() bool {
+func (trie *pathTrie[T]) isLeaf() bool {
 	return len(trie.children) == 0
 }

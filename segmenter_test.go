@@ -99,15 +99,14 @@ func TestCustomPathSegmenter(t *testing.T) {
 		".a.b.c.d.e": false,
 	}
 
-	tie := NewPathTrieWithConfig(&PathTrieConfig{Segmenter: testPathSegmenterDot})
+	tie := NewPathTrie(WithSegmenter[any](testPathSegmenterDot))
 	for k := range depthTest {
 		tie.Put(k, true)
 	}
 
 	for k := range depthTest {
-		tie.WalkPath(k, func(k string, v interface{}) error {
-			out := tie.Get(k)
-			if out != nil {
+		tie.WalkPath(k, func(k string, _ any) error {
+			if _, ok := tie.Get(k); ok {
 				depthTest[k] = true
 			}
 			return nil

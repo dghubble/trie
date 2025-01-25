@@ -1,10 +1,10 @@
 package trie
 
-// Trier exposes the Trie structure capabilities.
-type Trier interface {
-	Get(key string) interface{}
-	Put(key string, value interface{}) bool
+// Trie exposes the Trie structure capabilities.
+type Trie[T any] interface {
+	Get(key string) (T, bool)
+	Put(key string, value T) bool
 	Delete(key string) bool
-	Walk(walker WalkFunc) error
-	WalkPath(key string, walker WalkFunc) error
+	Walk(walker WalkFunc[T]) error
+	WalkPath(key string, walker WalkFunc[T]) error
 }

@@ -43,7 +43,7 @@ func init() {
 // string keys
 
 func BenchmarkRuneTriePutStringKey(b *testing.B) {
-	trie := NewRuneTrie()
+	trie := NewRuneTrie[int]()
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
@@ -52,7 +52,7 @@ func BenchmarkRuneTriePutStringKey(b *testing.B) {
 }
 
 func BenchmarkRuneTrieGetStringKey(b *testing.B) {
-	trie := NewRuneTrie()
+	trie := NewRuneTrie[int]()
 	for i := 0; i < b.N; i++ {
 		trie.Put(stringKeys[i%len(stringKeys)], i)
 	}
@@ -66,7 +66,7 @@ func BenchmarkRuneTrieGetStringKey(b *testing.B) {
 // path keys
 
 func BenchmarkRuneTriePutPathKey(b *testing.B) {
-	trie := NewRuneTrie()
+	trie := NewRuneTrie[int]()
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
@@ -75,7 +75,7 @@ func BenchmarkRuneTriePutPathKey(b *testing.B) {
 }
 
 func BenchmarkRuneTrieGetPathKey(b *testing.B) {
-	trie := NewRuneTrie()
+	trie := NewRuneTrie[int]()
 	for i := 0; i < b.N; i++ {
 		trie.Put(pathKeys[i%len(pathKeys)], i)
 	}
@@ -92,7 +92,7 @@ func BenchmarkRuneTrieGetPathKey(b *testing.B) {
 // string keys
 
 func BenchmarkPathTriePutStringKey(b *testing.B) {
-	trie := NewPathTrie()
+	trie := NewPathTrie[int]()
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
@@ -101,7 +101,7 @@ func BenchmarkPathTriePutStringKey(b *testing.B) {
 }
 
 func BenchmarkPathTrieGetStringKey(b *testing.B) {
-	trie := NewPathTrie()
+	trie := NewPathTrie[int]()
 	for i := 0; i < b.N; i++ {
 		trie.Put(stringKeys[i%len(stringKeys)], i)
 	}
@@ -115,7 +115,7 @@ func BenchmarkPathTrieGetStringKey(b *testing.B) {
 // path keys
 
 func BenchmarkPathTriePutPathKey(b *testing.B) {
-	trie := NewPathTrie()
+	trie := NewPathTrie[int]()
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
@@ -124,7 +124,7 @@ func BenchmarkPathTriePutPathKey(b *testing.B) {
 }
 
 func BenchmarkPathTrieGetPathKey(b *testing.B) {
-	trie := NewPathTrie()
+	trie := NewPathTrie[int]()
 	for i := 0; i < b.N; i++ {
 		trie.Put(pathKeys[i%len(pathKeys)], i)
 	}

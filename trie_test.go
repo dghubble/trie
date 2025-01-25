@@ -5,118 +5,118 @@ import (
 	"testing"
 )
 
-// RuneTrie
+// rune trie
 
 func TestRuneTrie(t *testing.T) {
-	trie := NewRuneTrie()
+	trie := NewRuneTrie[any]()
 	testTrie(t, trie)
 }
 
 func TestRuneTrieNilBehavior(t *testing.T) {
-	trie := NewRuneTrie()
+	trie := NewRuneTrie[any]()
 	testNilBehavior(t, trie)
 }
 
 func TestRuneTrieRoot(t *testing.T) {
-	trie := NewRuneTrie()
+	trie := NewRuneTrie[any]()
 	testTrieRoot(t, trie)
 
-	trie = NewRuneTrie()
-	if !trie.isLeaf() {
+	trie = NewRuneTrie[any]()
+
+	runeTrie, ok := trie.(*runeTrie[any])
+	if !ok {
+		t.Errorf("trie created with unexpected type %T", trie)
+	}
+	if !runeTrie.isLeaf() {
 		t.Error("root of empty tree should be leaf")
 	}
-	trie.Put("", "root")
-	if !trie.isLeaf() {
+	runeTrie.Put("", "root")
+	if !runeTrie.isLeaf() {
 		t.Error("root should not have children, only value")
 	}
 }
 
 func TestRuneTrieWalk(t *testing.T) {
-	trie := NewRuneTrie()
+	trie := NewRuneTrie[any]()
 	testTrieWalk(t, trie)
 }
 
 func TestRuneTrieWalkError(t *testing.T) {
-	trie := NewRuneTrie()
+	trie := NewRuneTrie[any]()
 	testTrieWalkError(t, trie)
 }
 
 func TestRuneTrieWalkPath(t *testing.T) {
-	trie := NewRuneTrie()
+	trie := NewRuneTrie[any]()
 	testTrieWalkPath(t, trie)
 }
 
 func TestRuneTrieWalkPathError(t *testing.T) {
-	trie := NewRuneTrie()
+	trie := NewRuneTrie[any]()
 	testTrieWalkPathError(t, trie)
 }
 
-// PathTrie
+// path trie
 
 func TestPathTrie(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie[any]()
 	testTrie(t, trie)
 }
 
-func TestPathTrieWithNilConfig(t *testing.T) {
-	trie := NewPathTrieWithConfig(nil)
-	testTrie(t, trie)
-}
-
-func TestPathTrieWithEmptyConfig(t *testing.T) {
-	trie := NewPathTrieWithConfig(&PathTrieConfig{})
-	testTrie(t, trie)
-}
-
-func TestPathTrieWithConfig(t *testing.T) {
-	trie := NewPathTrieWithConfig(&PathTrieConfig{PathSegmenter})
+func TestPathTrieWithSegmenter(t *testing.T) {
+	trie := NewPathTrie(WithSegmenter[any](PathSegmenter))
 	testTrie(t, trie)
 }
 
 func TestPathTrieNilBehavior(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie[any]()
 	testNilBehavior(t, trie)
 }
 
 func TestPathTrieRoot(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie[any]()
 	testTrieRoot(t, trie)
 
-	trie = NewPathTrie()
-	if !trie.isLeaf() {
+	trie = NewPathTrie[any]()
+
+	pathTrie, ok := trie.(*pathTrie[any])
+	if !ok {
+		t.Errorf("trie created with unexpected type %T", trie)
+	}
+	if !pathTrie.isLeaf() {
 		t.Error("root of empty tree should be leaf")
 	}
 	trie.Put("", "root")
-	if !trie.isLeaf() {
+	if !pathTrie.isLeaf() {
 		t.Error("root should not have children, only value")
 	}
 }
 
 func TestPathTrieWalk(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie[any]()
 	testTrieWalk(t, trie)
 }
 
 func TestPathTrieWalkError(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie[any]()
 	testTrieWalkError(t, trie)
 }
 
 func TestPathTrieWalkPath(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie[any]()
 	testTrieWalkPath(t, trie)
 }
 
 func TestPathTrieWalkPathError(t *testing.T) {
-	trie := NewPathTrie()
+	trie := NewPathTrie[any]()
 	testTrieWalkPathError(t, trie)
 }
 
-func testTrie(t *testing.T, trie Trier) {
+func testTrie(t *testing.T, trie Trie[any]) {
 	const firstPutValue = "first put"
 	cases := []struct {
 		key   string
-		value interface{}
+		value any
 	}{
 		{"fish", 0},
 		{"/cat", 1},
@@ -131,7 +131,7 @@ func testTrie(t *testing.T, trie Trier) {
 
 	// get missing keys
 	for _, c := range cases {
-		if value := trie.Get(c.key); value != nil {
+		if value, ok := trie.Get(c.key); ok {
 			t.Errorf("expected key %s to be missing, found value %v", c.key, value)
 		}
 	}
@@ -152,7 +152,7 @@ func testTrie(t *testing.T, trie Trier) {
 
 	// get
 	for _, c := range cases {
-		if value := trie.Get(c.key); value != c.value {
+		if value, ok := trie.Get(c.key); !ok || value != c.value {
 			t.Errorf("expected key %s to have value %v, got %v", c.key, c.value, value)
 		}
 	}
@@ -174,22 +174,23 @@ func testTrie(t *testing.T, trie Trier) {
 
 	// get deleted keys
 	for _, c := range cases {
-		if value := trie.Get(c.key); value != nil {
+		if value, ok := trie.Get(c.key); ok {
 			t.Errorf("expected key %s to be deleted, got value %v", c.key, value)
 		}
 	}
 }
 
-func testNilBehavior(t *testing.T, trie Trier) {
+func testNilBehavior(t *testing.T, trie Trie[any]) {
 	cases := []struct {
 		key   string
-		value interface{}
+		value any
 	}{
 		{"/cat", 1},
 		{"/catamaran", 2},
 		{"/caterpillar", nil},
 	}
-	expectNilValues := []string{"/", "/c", "/ca", "/caterpillar", "/other"}
+	expectNilValues := []string{"/caterpillar"}
+	expectNotPresentValues := []string{"/", "/c", "/ca", "/other"}
 
 	// initial put
 	for _, c := range cases {
@@ -200,17 +201,24 @@ func testNilBehavior(t *testing.T, trie Trier) {
 
 	// get nil
 	for _, key := range expectNilValues {
-		if value := trie.Get(key); value != nil {
-			t.Errorf("expected key %s to have value nil, got %v", key, value)
+		if _, ok := trie.Get(key); !ok {
+			t.Errorf("expected key %s to have value nil, but was not present", key)
+		}
+	}
+
+	// get not inserted values
+	for _, key := range expectNotPresentValues {
+		if value, ok := trie.Get(key); ok {
+			t.Errorf("expected key %s to not be present, but was present with value %v", key, value)
 		}
 	}
 }
 
-func testTrieRoot(t *testing.T, trie Trier) {
+func testTrieRoot(t *testing.T, trie Trie[any]) {
 	const firstPutValue = "first put"
 	const putValue = "value"
 
-	if value := trie.Get(""); value != nil {
+	if value, ok := trie.Get(""); ok {
 		t.Errorf("expected key '' to be missing, found value %v", value)
 	}
 	if !trie.Put("", firstPutValue) {
@@ -219,19 +227,19 @@ func testTrieRoot(t *testing.T, trie Trier) {
 	if trie.Put("", putValue) {
 		t.Error("expected key '' to have a value already")
 	}
-	if value := trie.Get(""); value != putValue {
+	if value, ok := trie.Get(""); !ok || value != putValue {
 		t.Errorf("expected key '' to have value %v, got %v", putValue, value)
 	}
 	if !trie.Delete("") {
 		t.Error("expected key '' to be deleted")
 	}
-	if value := trie.Get(""); value != nil {
+	if value, ok := trie.Get(""); ok {
 		t.Errorf("expected key '' to be deleted, got value %v", value)
 	}
 }
 
-func testTrieWalk(t *testing.T, trie Trier) {
-	table := map[string]interface{}{
+func testTrieWalk(t *testing.T, trie Trie[any]) {
+	table := map[string]any{
 		"":             -1,
 		"fish":         0,
 		"/cat":         1,
@@ -254,7 +262,7 @@ func testTrieWalk(t *testing.T, trie Trier) {
 		}
 	}
 
-	walker := func(key string, value interface{}) error {
+	walker := func(key string, value any) error {
 		// value for each walked key is correct
 		if value != table[key] {
 			t.Errorf("expected key %s to have value %v, got %v", key, table[key], value)
@@ -274,8 +282,8 @@ func testTrieWalk(t *testing.T, trie Trier) {
 	}
 }
 
-func testTrieWalkError(t *testing.T, trie Trier) {
-	table := map[string]interface{}{
+func testTrieWalkError(t *testing.T, trie Trie[any]) {
+	table := map[string]any{
 		"/L1/L2A":        1,
 		"/L1/L2B/L3A":    2,
 		"/L1/L2B/L3B/L4": 42,
@@ -304,8 +312,8 @@ func testTrieWalkError(t *testing.T, trie Trier) {
 	}
 }
 
-func testTrieWalkPath(t *testing.T, trie Trier) {
-	table := map[string]interface{}{
+func testTrieWalkPath(t *testing.T, trie Trie[any]) {
+	table := map[string]any{
 		"fish":             0,
 		"/cat":             1,
 		"/dog":             2,
@@ -375,7 +383,7 @@ func testTrieWalkPath(t *testing.T, trie Trier) {
 
 	var foundRoot bool
 	trie.Put("", "ROOT")
-	trie.WalkPath("/notes/new/noise", func(key string, value interface{}) error {
+	trie.WalkPath("/notes/new/noise", func(key string, value any) error {
 		if key == "" && value == "ROOT" {
 			foundRoot = true
 		}
@@ -386,8 +394,8 @@ func testTrieWalkPath(t *testing.T, trie Trier) {
 	}
 }
 
-func testTrieWalkPathError(t *testing.T, trie Trier) {
-	table := map[string]interface{}{
+func testTrieWalkPathError(t *testing.T, trie Trie[any]) {
+	table := map[string]any{
 		"/L1/L2A":        1,
 		"/L1/L2A/L3B":    99,
 		"/L1/L2A/L3B/L4": 2,
